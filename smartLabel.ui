@@ -1,0 +1,667 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>frm_SmartLabel</class>
+ <widget class="QWidget" name="frm_SmartLabel">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>600</width>
+    <height>956</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>600</width>
+    <height>300</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>smartLabel 2.0</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(60, 68, 81);
+color: rgb(213, 213, 213);
+font: 10pt &quot;MS Shell Dlg 2&quot;;
+disabled-color: rgb(50, 50, 50);</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <layout class="QVBoxLayout" name="layV_window" stretch="1,0">
+     <item>
+      <widget class="QGroupBox" name="grp_Node">
+       <property name="title">
+        <string>node</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QHBoxLayout" name="layH_Node1">
+          <item>
+           <widget class="QLabel" name="lbl_NodeLabel">
+            <property name="text">
+             <string>label</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTextEdit" name="edt_NodeLabel">
+            <property name="toolTip">
+             <string>write new label here
+It is not allowed to use special characters for nodes</string>
+            </property>
+            <property name="acceptRichText">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="layH_Node2">
+          <item>
+           <spacer name="spcH_Node1">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="ckx_HideInput">
+            <property name="toolTip">
+             <string>use alt + h as shortcut</string>
+            </property>
+            <property name="text">
+             <string>&amp;hide input</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="ckx_PostageStamp">
+            <property name="toolTip">
+             <string>use alt + p as shortcut</string>
+            </property>
+            <property name="text">
+             <string>&amp;postage stamp</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="ckx_Bookmark">
+            <property name="toolTip">
+             <string>use alt + k as shortcut</string>
+            </property>
+            <property name="text">
+             <string>bookmar&amp;k</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spcH_Node2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grp_Tracker">
+          <property name="title">
+           <string>tracker</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <layout class="QHBoxLayout" name="layH_TrackerA" stretch="1,3">
+             <item>
+              <widget class="QLabel" name="lbl_TrackerTransform">
+               <property name="text">
+                <string>transform</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbx_TrackerTransform">
+               <property name="toolTip">
+                <string>set new transform method</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="layH_TrackerB" stretch="1,2,1">
+             <item>
+              <widget class="QLabel" name="lbl_TrackerRefFrame">
+               <property name="text">
+                <string>reference frame</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="spn_TrackerRefFrame">
+               <property name="toolTip">
+                <string>set new reference frame</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_TrackerGetFrame">
+               <property name="toolTip">
+                <string>get current frame from viewer
+use alt + g as shortcut</string>
+               </property>
+               <property name="text">
+                <string>&amp;get current</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grp_Merge">
+          <property name="title">
+           <string>merge</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <layout class="QHBoxLayout" name="layH_Merge1" stretch="1,5">
+             <item>
+              <widget class="QLabel" name="lbl_MergeOperation">
+               <property name="text">
+                <string>operation</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbx_MergeOperation">
+               <property name="toolTip">
+                <string>set new operation for Merge and Channel Merge</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="layH_Merge2" stretch="1,5">
+             <item>
+              <widget class="QLabel" name="lbl_MergeBbox">
+               <property name="text">
+                <string>bbox</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbx_MergeBBox">
+               <property name="toolTip">
+                <string>set new Bbox for Merge, Channel Merge and Keymix</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grp_Info">
+          <property name="title">
+           <string>info</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <layout class="QHBoxLayout" name="layH_Info1" stretch="0,5,0,0,5">
+             <item>
+              <widget class="QLabel" name="lbl_InfoAlign">
+               <property name="text">
+                <string>align</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbx_InfoAlign">
+               <property name="toolTip">
+                <string>set alignment for Backdrop and StickyNote</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="spcH_Info3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="lbl_InfoIcon">
+               <property name="text">
+                <string>icon</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbx_InfoIcon">
+               <property name="toolTip">
+                <string>put an Icon at the beginning of the text</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="layH_Info2" stretch="0,2,0,1,1">
+             <item>
+              <widget class="QLabel" name="lbl_InfoFontSize">
+               <property name="text">
+                <string>font size</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="spn_InfoFontSize">
+               <property name="toolTip">
+                <string>set the font size to Backdrop and StickyNote</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="spcH_Info2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="ckx_InfoBold">
+               <property name="toolTip">
+                <string>set font as bold to Backdrop and StickyNote</string>
+               </property>
+               <property name="text">
+                <string>&amp;bold</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="ckx_InfoItalic">
+               <property name="toolTip">
+                <string>set font as italic to Backdrop and StickyNote</string>
+               </property>
+               <property name="text">
+                <string>&amp;italic</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="layH_Info3" stretch="0,1,2">
+             <item>
+              <widget class="QLabel" name="lbl_InfoZOrder">
+               <property name="text">
+                <string>z order</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="spn_InfoZOrder">
+               <property name="toolTip">
+                <string>set zOrder for Backdrop</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="spcH_Info1">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grp_Filter">
+          <property name="title">
+           <string>filter</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <item>
+            <widget class="QComboBox" name="cbx_FilterChannels">
+             <property name="toolTip">
+              <string>set channel for Filter nodes</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="layH_Filter1">
+             <item>
+              <widget class="QLabel" name="lbl_FilterSize">
+               <property name="text">
+                <string>size</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="spn_FilterSize">
+               <property name="toolTip">
+                <string>set filter size for Filter nodes</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="sld_FilterSize">
+               <property name="toolTip">
+                <string>set filter size for Filter nodes</string>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="lbl_FilterSizeB">
+               <property name="text">
+                <string>size h</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QDoubleSpinBox" name="spn_FilterSizeB">
+               <property name="toolTip">
+                <string>set filter size for Filter nodes</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSlider" name="sld_FilterSizeB">
+               <property name="toolTip">
+                <string>set filter size for Filter nodes</string>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grp_Switch">
+          <property name="title">
+           <string>switch</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item>
+            <layout class="QHBoxLayout" name="layH_Switch1">
+             <item>
+              <widget class="QLabel" name="lbl_SwitchWhich">
+               <property name="text">
+                <string>which</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="edt_SwitchWhich">
+               <property name="toolTip">
+                <string>set input value for Switch and Dissolve</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="layH_Switch2" stretch="0,2">
+             <item>
+              <widget class="QCheckBox" name="ckx_SwitchExpression">
+               <property name="toolTip">
+                <string>set an expression for Switch and Dissolve</string>
+               </property>
+               <property name="text">
+                <string>use &amp;expression</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbx_SwitchExpression">
+               <property name="toolTip">
+                <string>choose an expression to Switch and Dissolve</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="layH_Switch3">
+             <item>
+              <widget class="QSpinBox" name="spn_SwitchValueA">
+               <property name="toolTip">
+                <string>set frame value for expressions</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QSpinBox" name="spn_SwitchValueB">
+               <property name="toolTip">
+                <string>set second frame value for inrange expression</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grp_Colorspaces">
+          <property name="title">
+           <string>colorspace</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="2,0">
+           <item>
+            <layout class="QVBoxLayout" name="layV_Colorspace1">
+             <item>
+              <widget class="QComboBox" name="cbx_ColorValueA">
+               <property name="toolTip">
+                <string>set log2lin/ lin2log to Log2Lin
+set in colorspace for OCIOColorspace and Colorspace</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="cbx_ColorValueB">
+               <property name="toolTip">
+                <string>set out colorspace for OCIOColorspace and Colorspace</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_ColorspaceSwap">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>60</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>swap between in and out values
+use alt + c as shortcut</string>
+             </property>
+             <property name="text">
+              <string>swap &amp;colors</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grp_Dot">
+          <property name="title">
+           <string>dot</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0,2,0,1,1">
+           <item>
+            <widget class="QLabel" name="lbl_DotFontSize">
+             <property name="text">
+              <string>font size</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QSpinBox" name="spn_DotFontSize">
+             <property name="toolTip">
+              <string>set the font size to Dot</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="spcH_Dot1">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="ckx_DotBold">
+             <property name="toolTip">
+              <string>set font as bold to Dot</string>
+             </property>
+             <property name="text">
+              <string>&amp;bold</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="ckx_DotItalic">
+             <property name="toolTip">
+              <string>set font as italic to Dot</string>
+             </property>
+             <property name="text">
+              <string>&amp;italic</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="layH_Buttons1" stretch="1,2">
+       <item>
+        <widget class="QPushButton" name="btn_cancel">
+         <property name="toolTip">
+          <string>cancel any changes done and close this window</string>
+         </property>
+         <property name="text">
+          <string>&amp;cancel</string>
+         </property>
+         <property name="shortcut">
+          <string>Esc</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_OK">
+         <property name="toolTip">
+          <string>confirm your changes and close this window</string>
+         </property>
+         <property name="text">
+          <string>&amp;ok</string>
+         </property>
+         <property name="shortcut">
+          <string>Return</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>edt_NodeLabel</tabstop>
+  <tabstop>btn_OK</tabstop>
+  <tabstop>ckx_HideInput</tabstop>
+  <tabstop>ckx_PostageStamp</tabstop>
+  <tabstop>ckx_Bookmark</tabstop>
+  <tabstop>cbx_TrackerTransform</tabstop>
+  <tabstop>spn_TrackerRefFrame</tabstop>
+  <tabstop>btn_TrackerGetFrame</tabstop>
+  <tabstop>cbx_MergeOperation</tabstop>
+  <tabstop>cbx_MergeBBox</tabstop>
+  <tabstop>cbx_InfoAlign</tabstop>
+  <tabstop>cbx_InfoIcon</tabstop>
+  <tabstop>spn_InfoFontSize</tabstop>
+  <tabstop>ckx_InfoBold</tabstop>
+  <tabstop>ckx_InfoItalic</tabstop>
+  <tabstop>spn_InfoZOrder</tabstop>
+  <tabstop>cbx_FilterChannels</tabstop>
+  <tabstop>spn_FilterSize</tabstop>
+  <tabstop>sld_FilterSize</tabstop>
+  <tabstop>edt_SwitchWhich</tabstop>
+  <tabstop>ckx_SwitchExpression</tabstop>
+  <tabstop>cbx_SwitchExpression</tabstop>
+  <tabstop>spn_SwitchValueA</tabstop>
+  <tabstop>spn_SwitchValueB</tabstop>
+  <tabstop>cbx_ColorValueA</tabstop>
+  <tabstop>cbx_ColorValueB</tabstop>
+  <tabstop>btn_ColorspaceSwap</tabstop>
+  <tabstop>spn_DotFontSize</tabstop>
+  <tabstop>ckx_DotBold</tabstop>
+  <tabstop>ckx_DotItalic</tabstop>
+  <tabstop>btn_cancel</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>
