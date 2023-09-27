@@ -2,10 +2,10 @@
 # content: tool to quickly edit node's label and
 #          some parameters
 #
-# version: 2.2.1
-# date: November 10 2022
+# version: 2.3.0
+# date: September 10 2023
 #
-# how to: getFrameUI()
+# how to: 
 # dependencies: nuke
 # todos: --//--
 #
@@ -19,7 +19,6 @@ import re
 import nuke
 
 from PySide2 import QtWidgets, QtCore, QtUiTools, QtGui
-
 from PySide2.QtWidgets import QMainWindow, QApplication, QWidget, QAction, QVBoxLayout
 
 #*******************************************************************
@@ -38,7 +37,8 @@ TRACKER_NODES = ['Tracker4', 'Tracker3']
 
 COLORSPACE_NODES = ['Log2Lin', 'OCIOColorSpace', 'Colorspace']
 
-WHICH_EXPRESSIONS = ['$gui', '!$gui', 'value error', 'frame ==', 'frame >', 'frame >=', 'frame <', 'frame <=', 'inrange frame']
+WHICH_EXPRESSIONS = ['$gui', '!$gui', 'value error', 'frame ==', 'frame >',
+                     'frame >=', 'frame <', 'frame <=', 'inrange frame']
 
 INFO_ALIGN = ['left', 'center', 'right']
 
@@ -54,23 +54,11 @@ ICON_SELECTION = ['none', 'Axis', 'Add', 'Bezier', 'Camera',
 class SmartLabel():
     def __init__(self, node):
 
-        try:
-            procedural_path = ([path.dirname(__file__)])
-            procedural_TITLE = (path.splitext(path.basename(__file__))[0])
-            path_ui = ("\\").join([path.dirname(__file__), "ui", procedural_TITLE + ".ui"])
-            self.SmartLabelUI = QtUiTools.QUiLoader().load(path_ui)
+        procedural_path = ([path.dirname(__file__)])
+        procedural_TITLE = (path.splitext(path.basename(__file__))[0])
+        path_ui = ("/").join([path.dirname(__file__), procedural_TITLE + ".ui"])
 
-        except:
-            HARDCODE_PATH = 'B:\\_scripts_\\smartLabel2.0'
-            TITLE = 'SmartLabel'
-            path_ui = ('\\').join([HARDCODE_PATH, TITLE + '.ui'])
-            self.SmartLabelUI = QtUiTools.QUiLoader().load(path_ui)
-
-        # NuBoyana path
-        #HARDCODE_PATH = '/nbpt/remote/homes/luciano.cequinel/nuke_custom_settings/nukeTools/smartLabel2.0'
-        #TITLE = 'smartLabel_2'
-        #path_ui = ('/').join([HARDCODE_PATH, TITLE + '.ui'])
-        #self.SmartLabelUI = QtUiTools.QUiLoader().load(path_ui)
+        self.SmartLabelUI = QtUiTools.QUiLoader().load(path_ui)
 
         self.SmartLabelUI.grp_Tracker.setVisible(False)
         self.SmartLabelUI.grp_Merge.setVisible(False)
@@ -84,7 +72,7 @@ class SmartLabel():
         self.SmartLabelUI.ckx_PostageStamp.setVisible(False)
         self.SmartLabelUI.ckx_Bookmark.setVisible(False)
 
-        self.SmartLabelUI.edt_NodeLabel.setTabChangesFocus(True)
+        #self.SmartLabelUI.edt_NodeLabel.setTabChangesFocus(True)
 
         self.node = node
         self.SmartLabelUI.grp_Node.setTitle(self.node.name())
@@ -156,13 +144,106 @@ class SmartLabel():
         self.SmartLabelUI.ckx_SwitchExpression.stateChanged.connect(self.change_Switch)
         self.SmartLabelUI.cbx_SwitchExpression.currentTextChanged.connect(self.changeExpression)
 
-        #self.SmartLabelUI.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Popup)
-        #self.SmartLabelUI.move(QtGui.QCursor.pos()+QtCore.QPoint(-100,-12))
+        self.SmartLabelUI.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Popup)
+        self.SmartLabelUI.move(QtGui.QCursor.pos() + QtCore.QPoint(-300,0))
         #self.SmartLabelUI.setDefault()
+
+        self.SmartLabelUI.edt_NodeLabel.setTabChangesFocus(True)
+        self.SmartLabelUI.edt_NodeLabel.setFocusPolicy(QtCore.Qt.StrongFocus)      
+        self.SmartLabelUI.edt_NodeLabel.setFocus()
 
         # readjust widget window and show it
         self.SmartLabelUI.adjustSize()
         self.SmartLabelUI.show()
+
+
+    def get_node(self, node):
+
+        self.node = node
+        self.SmartLabelUI.grp_Node.setTitle(self.node.name())
+
+        # get current label and fill edt_NodeLabel
+        self.currentLabel = self.node['label'].value()
+        self.SmartLabelUI.edt_NodeLabel.setText(self.currentLabel)
+        self.SmartLabelUI.edt_NodeLabel.selectAll()
+
+        # get current state of hide_input, postage_stamp, bookmark
+        if 'hide_input' in self.node.knobs():
+            curHide = self.node['hide_input'].value()
+            self.SmartLabelUI.ckx_HideInput.setVisible(True)
+            self.SmartLabelUI.ckx_HideInput.setChecked(curHide)
+
+        if 'postage_stamp' in self.node.knobs():
+            curPostage = self.node['postage_stamp'].value()
+            self.SmartLabelUI.ckx_PostageStamp.setVisible(True)
+            self.SmartLabelUI.ckx_PostageStamp.setChecked(curPostage)
+
+        if 'bookmark' in self.node.knobs():
+            curBookmark = self.node['bookmark'].value()
+            self.SmartLabelUI.ckx_Bookmark.setVisible(True)
+            self.SmartLabelUI.ckx_Bookmark.setChecked(curBookmark)
+
+        # get current node.Class to send it to specific function
+        self.currentClass = 'none'
+        if self.node.Class() in TRACKER_NODES:
+            self.currentClass = 'tracker'
+            self.trackerUI()
+
+        elif self.node.Class() in MERGE_NODES:
+            self.currentClass = 'keymix'
+            self.mergeUI()
+
+        elif self.node.Class() in INFO_NODES:
+            self.currentClass = 'info'
+            self.infoUI()
+
+        elif self.node.Class() in SWITCH_NODES:
+            self.currentClass = 'switch'
+            self.switchUI()
+
+        elif self.node.Class() in COLORSPACE_NODES:
+            self.currentClass = 'colorspace'
+            self.colorspaceUI()
+
+        elif self.node.Class() in DOT_NODE:
+            self.currentClass = 'dot'
+            self.dotUI()
+
+        else:
+           for knob in self.node.knobs():
+               if knob in ('size', 'defocus'):
+                       self.currentClass = knob #'filter'
+                       self.filterUI()
+
+
+
+        self.SmartLabelUI.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Popup)
+        self.SmartLabelUI.move(QtGui.QCursor.pos()+QtCore.QPoint(-300,0))
+
+        self.SmartLabelUI.edt_NodeLabel.setTabChangesFocus(True)
+        self.SmartLabelUI.edt_NodeLabel.setFocusPolicy(QtCore.Qt.StrongFocus)      
+        self.SmartLabelUI.edt_NodeLabel.setFocus()
+
+        signals = self.set_signals()
+
+        # readjust widget window and show it
+        self.SmartLabelUI.adjustSize()
+        self.SmartLabelUI.show()
+
+
+    def set_signals(self):
+        # SIGNALS
+        self.SmartLabelUI.btn_OK.clicked.connect(self.press_OK)
+        self.SmartLabelUI.btn_cancel.clicked.connect(self.press_cancel)
+        self.SmartLabelUI.btn_TrackerGetFrame.clicked.connect(self.press_TrackerGetCurrentFrame)
+        self.SmartLabelUI.btn_ColorspaceSwap.clicked.connect(self.press_ColorspaceSwap)
+        self.SmartLabelUI.spn_FilterSize.valueChanged.connect(self.spin_FilterSize)
+        self.SmartLabelUI.sld_FilterSize.valueChanged.connect(self.slide_FilterSize)
+        self.SmartLabelUI.spn_FilterSizeB.valueChanged.connect(self.spin_FilterSizeB)
+        self.SmartLabelUI.sld_FilterSizeB.valueChanged.connect(self.slide_FilterSizeB)
+        self.SmartLabelUI.cbx_InfoAlign.currentTextChanged.connect(self.change_Alignment)
+        self.SmartLabelUI.ckx_SwitchExpression.stateChanged.connect(self.change_Switch)
+        self.SmartLabelUI.cbx_SwitchExpression.currentTextChanged.connect(self.changeExpression)
 
     def trackerUI(self):
         self.SmartLabelUI.grp_Tracker.setVisible(True)
@@ -689,4 +770,3 @@ if __name__ == '__main__':
         app.exec_()
     except:
         run()
-

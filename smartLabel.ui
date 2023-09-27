@@ -36,6 +36,9 @@ disabled-color: rgb(50, 50, 50);</string>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <layout class="QHBoxLayout" name="layH_Node1">
+          <property name="topMargin">
+           <number>20</number>
+          </property>
           <item>
            <widget class="QLabel" name="lbl_NodeLabel">
             <property name="text">
@@ -164,6 +167,38 @@ use alt + g as shortcut</string>
                </property>
                <property name="text">
                 <string>&amp;get current</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="layH_MarkTracks" stretch="1,0,0,0">
+             <item>
+              <widget class="QLabel" name="lbl_MarkTracks">
+               <property name="text">
+                <string>mark all Tracks</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="ckx_Translate">
+               <property name="text">
+                <string>translate</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="ckx_Rotate">
+               <property name="text">
+                <string>rotate</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="ckx_Scale">
+               <property name="text">
+                <string>scale</string>
                </property>
               </widget>
              </item>
@@ -638,6 +673,9 @@ use alt + c as shortcut</string>
   <tabstop>cbx_TrackerTransform</tabstop>
   <tabstop>spn_TrackerRefFrame</tabstop>
   <tabstop>btn_TrackerGetFrame</tabstop>
+  <tabstop>ckx_Translate</tabstop>
+  <tabstop>ckx_Rotate</tabstop>
+  <tabstop>ckx_Scale</tabstop>
   <tabstop>cbx_MergeOperation</tabstop>
   <tabstop>cbx_MergeBBox</tabstop>
   <tabstop>cbx_InfoAlign</tabstop>
@@ -649,6 +687,8 @@ use alt + c as shortcut</string>
   <tabstop>cbx_FilterChannels</tabstop>
   <tabstop>spn_FilterSize</tabstop>
   <tabstop>sld_FilterSize</tabstop>
+  <tabstop>spn_FilterSizeB</tabstop>
+  <tabstop>sld_FilterSizeB</tabstop>
   <tabstop>edt_SwitchWhich</tabstop>
   <tabstop>ckx_SwitchExpression</tabstop>
   <tabstop>cbx_SwitchExpression</tabstop>
