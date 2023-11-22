@@ -4,4 +4,6 @@
 /backupSmartLabel
 /refs
 /tests
+/old
+.idea
 UI_test.py

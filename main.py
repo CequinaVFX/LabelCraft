@@ -1,4 +1,4 @@
-__title__ = 'SmartLabel'  # 'LabelCraft'
+__title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __version__ = '1.0.0'
@@ -13,16 +13,10 @@ from PySide2 import QtUiTools, QtCore, QtGui
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QFontComboBox
 
-# node = nuke.selectedNode()
-# print(nuke.layers(node))
-#
-# new_shuf = nuke.createNode('Shuffle')
-#
-# new_shuf['in'].setValue('shadow')
 
 class LabelCraft:
     def __init__(self):
-        dir_path = 'B:/_CQNTools_/smartLabel'  # os.path.dirname(__file__)
+        dir_path = os.path.dirname(__file__)
         path_ui = '/'.join([dir_path, __title__ + '.ui'])
 
         self.LabelCraftUI = QtUiTools.QUiLoader().load(path_ui)
@@ -34,6 +28,7 @@ class LabelCraft:
         self.current_node_class = 'none'
 
         # Set all groups to invisible and show the node.Class() related
+        self.LabelCraftUI.grp_Read.setVisible(False)
         self.LabelCraftUI.grp_Roto.setVisible(False)
         self.LabelCraftUI.grp_Tracker.setVisible(False)
         self.LabelCraftUI.grp_Merge.setVisible(False)
@@ -118,20 +113,76 @@ class LabelCraft:
     def get_layers(self):
         standard_layers = ['none', 'rgb', 'rgba', 'alpha']
 
+        extended_layer_list = ['none', 'alpha']
         for layer in nuke.layers(self.node):
-            if layer not in standard_layers:
-                standard_layers.append(layer)
+            # if layer not in standard_layers:
+            extended_layer_list.append(layer)
 
-        return sorted(standard_layers)
+        if sorted(standard_layers) == sorted(extended_layer_list):
+            print('same layers')
+            print('standard_layers ', standard_layers)
+            print('extended layers ', extended_layer_list)
+            return None  # sorted(standard_layers)
+        else:
+            print('different layers')
+            print('standard_layers ', standard_layers)
+            print('extended layers ', extended_layer_list)
+
+            return sorted(extended_layer_list)
+
+    # Read Class functions
+    def read_class(self):
+        self.LabelCraftUI.grp_Read.setVisible(True)
+
+        colorspace_options = self.node['colorspace'].values()
+        colorspace_state = self.node['colorspace'].value()
+        self.LabelCraftUI.cbx_Colorspace.addItems(colorspace_options)
+        self.LabelCraftUI.cbx_Colorspace.setCurrentText(colorspace_state)
+
+        self.LabelCraftUI.lbl_ReadChannels.setVisible(False)
+        self.LabelCraftUI.cbx_Channels.setVisible(False)
+        self.LabelCraftUI.btn_Shuffle.setVisible(False)
+
+        valid_layers = self.get_layers()
+        if valid_layers:
+            self.LabelCraftUI.lbl_ReadChannels.setVisible(True)
+            self.LabelCraftUI.cbx_Channels.setVisible(True)
+            self.LabelCraftUI.btn_Shuffle.setVisible(True)
+            self.LabelCraftUI.cbx_Channels.addItems(valid_layers)
+            self.LabelCraftUI.btn_Shuffle.clicked.connect(self.shuffle_layer)
+
+        self.LabelCraftUI.cbx_Colorspace.currentTextChanged.connect(self.change_read_colorspace)
+
+    def change_read_colorspace(self):
+        self.node['colorspace'].setValue(str(self.LabelCraftUI.cbx_Colorspace.currentText()))
+
+    def shuffle_layer(self):
+        chosen_layer = str(self.LabelCraftUI.cbx_Channels.currentText())
+        print(chosen_layer)
+        node_outputs = nuke.dependentNodes(nuke.INPUTS | nuke.HIDDEN_INPUTS | nuke.EXPRESSIONS, [self.node])
+
+        shuffle_node = nuke.nodes.Shuffle(name="Shuffle_" + chosen_layer)
+        shuffle_node.knob("in").setValue(chosen_layer)
+        # shuffle_node["hide_input"].setValue(True)
+        shuffle_node["postage_stamp"].setValue(True)
+
+        # for output in node_outputs:
+        #     # print dep.name()
+        #     if output.name() == 'Shuffle_Dot':
+        #         print('dot found')
+        #         _selection = nuke.toNode('Shuffle_Dot')
+        #         shuffle_node.setInput(0, _selection)
+
+        # print('new dot')
+        # new_dot = nuke.nodes.Dot(name='Shuffle_Dot')
+        # new_dot.setInput(0, self.node)
+        shuffle_node.setInput(0, self.node)
 
     # Tracker Class functions
     def tracker_class(self) :
         # set group to visible and edit the group's name
         self.LabelCraftUI.grp_Tracker.setVisible(True)
         self.LabelCraftUI.grp_Tracker.setTitle('Tracker knobs')
-
-        # add signal
-        self.LabelCraftUI.btn_TrackerGetFrame.clicked.connect(self.press_get_current_frame)
 
         transform_options = self.node['transform'].values()
         self.LabelCraftUI.cbx_TrackerTransform.addItems(transform_options)
@@ -144,6 +195,9 @@ class LabelCraft:
         self.LabelCraftUI.spn_TrackerRefFrame.setValue(reference_frame)
 
         self.get_tracks_names()
+        # add signal
+        self.LabelCraftUI.cbx_TrackerTransform.currentTextChanged.connect(self.change_transform)
+        self.LabelCraftUI.btn_TrackerGetFrame.clicked.connect(self.press_get_current_frame)
 
     def get_tracks_names(self):
         n = self.node["tracks"].toScript()
@@ -161,77 +215,12 @@ class LabelCraft:
 
         # return trackers
 
+    def change_transform(self):
+        self.node['transform'].setValue(str(self.LabelCraftUI.cbx_TrackerTransform.currentText()))
+
     def press_get_current_frame(self) :
         self.LabelCraftUI.spn_TrackerRefFrame.setValue(nuke.frame())
-
-    # Read Class functions
-    def read_class(self):
-        self.LabelCraftUI.grp_Read.setVisible(True)
-
-        colorspace_options = self.node['colorspace'].values()
-        colorspace_state = self.node['colorspace'].value()
-        self.LabelCraftUI.cbx_Colorspace.addItems(colorspace_options)
-        self.LabelCraftUI.cbx_Colorspace.setCurrentText(colorspace_state)
-
-        valid_layers = self.get_layers()
-        self.LabelCraftUI.cbx_Channels.addItems(valid_layers)
-
-        self.LabelCraftUI.cbx_Colorspace.currentTextChanged.connect(self.change_read_colorspace)
-        self.LabelCraftUI.btn_Shuffle.clicked.connect(self.shuffle_layer)
-
-    def change_read_colorspace(self):
-        self.node['colorspace'].setValue(str(self.LabelCraftUI.cbx_Colorspace.currentText()))
-
-    def shuffle_layer(self):
-        chosen_layer = str(self.LabelCraftUI.cbx_Channels.currentText())
-
-        shuffle = nuke.nodes.Shuffle(xpos=(self.node.xpos() + 100),
-                                      ypos=(self.node.ypos() + 50),
-                                      label='[value in]',
-                                      inputs=[self.node],
-                                      selected=True)
-
-        shuffle['in'].setValue(chosen_layer)
-        shuffle['out'].setValue('rgba')
-
-        if chosen_layer == "alpha":
-            channel_in = ['rgba.alpha' for _ in range(4)]
-        else:
-            channel_in = [layer for layer in self.node.channels() if layer.split(".")[0] == chosen_layer]
-            channel_in = self._sanity_channels(channel_in)
-
-        channel_out = ('rgba.red', 'rgba.green', 'rgba.blue', 'rgba.alpha')
-        in_2 = 0 if "depth.Z" in channel_in or "alpha" in channel_in else 1
-        layer_in = (0, 0, 0, in_2)
-
-        if "rgba.alpha" in channel_in:
-            shuffle.knob("in").setValue("rgba.alpha")
-
-        mapping = (list((zip(layer_in, channel_in, channel_out))))
-        print('mapping ', mapping)
-        shuffle.knob("mappings").setValue(mapping)
-        return shuffle
-
-    def _sanity_channels(self, layers):
-        """For some reasons nuke node.channels() does not return consistent orders for r, g, b.
-
-        Therefore ome re-ordering is necessary as well as connecting a single input to all 4 output layers.
-
-        Args:
-            layers (list): Layer names to re-order.
-
-        """
-        if len(layers) == 1 :
-            layers = [layers[0] for _ in range(4)]
-        elif len(layers) == 3:
-            layers.append("rgba.alpha")
-        d = {".red": 0, ".green": 1, ".blue": 2, ".alpha": 3}
-        new_layer = [i for i in layers]
-        for layer in new_layer:
-            for k, v in d.items():
-                if layer.endswith(k):
-                    layers[v] = layer
-        return layers
+        self.node['reference_frame'].setValue(nuke.frame())
 
     # Merge Class functions
     def merge_class(self) :
@@ -359,15 +348,15 @@ class LabelCraft:
         align = 'center'
         icon = 'none'
 
-        HTML = re.findall('<(.*?)>', self.current_label)
+        check_html = re.findall('<(.*?)>', self.current_label)
 
         try :
-            align = HTML[0]
+            align = check_html[0]
         except :
             align = 'center'
 
         try :
-            icon = re.findall('"(.*?).png', HTML[1])[0]
+            icon = re.findall('"(.*?).png', check_html[1])[0]
         except :
             icon = 'none'
 
@@ -379,29 +368,29 @@ class LabelCraft:
         self.LabelCraftUI.spn_InfoZOrder.setVisible(False)
 
         try :
-            self.current_label = self.current_label.replace('<%s>' % HTML[0], '')
-            self.current_label = self.current_label.replace('<%s>' % HTML[1], '')
+            self.current_label = self.current_label.replace('<%s>' % check_html[0], '')
+            self.current_label = self.current_label.replace('<%s>' % check_html[1], '')
         except :
             pass
 
         self.LabelCraftUI.edt_NodeLabel.setText(self.current_label)
         self.LabelCraftUI.edt_NodeLabel.selectAll()
 
-        curFont = int(self.node['note_font_size'].value())
-        self.LabelCraftUI.spn_InfoFontSize.setValue(curFont)
+        font_state = int(self.node['note_font_size'].value())
+        self.LabelCraftUI.spn_InfoFontSize.setValue(font_state)
         self.LabelCraftUI.spn_InfoFontSize.setRange(1, 350)
 
-        curNoteFont = self.node['note_font'].value()
-        print('current font ', curNoteFont)
+        note_font_state = self.node['note_font'].value()
+        print('current font ', note_font_state)
 
-        try :
-            bold = re.findall('Bold', curNoteFont)[0]
-        except :
+        try:
+            bold = re.findall('Bold', note_font_state)[0]
+        except:
             bold = False
 
-        try :
-            italic = re.findall('Italic', curNoteFont)[0]
-        except :
+        try:
+            italic = re.findall('Italic', note_font_state)[0]
+        except:
             italic = False
 
         if bold :
@@ -410,11 +399,11 @@ class LabelCraft:
             self.LabelCraftUI.ckx_InfoItalic.setChecked(True)
 
         if 'z_order' in self.node.knobs() :
-            curOrder = int(self.node['z_order'].value())
+            order_state = int(self.node['z_order'].value())
             self.LabelCraftUI.lbl_InfoZOrder.setVisible(True)
             self.LabelCraftUI.spn_InfoZOrder.setVisible(True)
             self.LabelCraftUI.spn_InfoZOrder.setRange(-20, 20)
-            self.LabelCraftUI.spn_InfoZOrder.setValue(curOrder)
+            self.LabelCraftUI.spn_InfoZOrder.setValue(order_state)
 
     # Switch/ Dissolve Class function
     def switch_class(self):
@@ -434,7 +423,6 @@ class LabelCraft:
         self.LabelCraftUI.spn_SwitchValueB.setRange(1, 1000000)
         self.LabelCraftUI.spn_SwitchValueB.setValue(standard_value_b)
 
-
         if self.LabelCraftUI.ckx_SwitchExpression.checkState() :
             self.LabelCraftUI.edt_SwitchWhich.setEnabled(False)
             self.LabelCraftUI.cbx_SwitchExpression.setEnabled(True)
@@ -447,64 +435,78 @@ class LabelCraft:
             self.LabelCraftUI.edt_SwitchWhich.setEnabled(True)
             self.LabelCraftUI.cbx_SwitchExpression.setEnabled(False)
 
-    # OCIOColorspace/ Colorpace/ Log2Lin Class function
+    # Log2Lin/ OCIOLogConvert Class function
+    def log2lin_class(self):
+        self.LabelCraftUI.grp_Colorspaces.setVisible(True)
+        self.LabelCraftUI.grp_Colorspaces.setTitle('{} knob'.format(self.node.Class()))
+
+        self.LabelCraftUI.lbl_ColorValueB.setVisible(False)
+        self.LabelCraftUI.cbx_ColorValueB.setVisible(False)
+        self.LabelCraftUI.btn_ColorspaceSwap.setVisible(False)
+
+        self.current_node_class = 'log'
+        self.LabelCraftUI.lbl_ColorValueA.setVisible(True)
+        self.LabelCraftUI.lbl_ColorValueA.setText('operation')
+
+        operation_state = str(self.node['operation'].value())
+        operation_options = self.node['operation'].values()
+
+        self.LabelCraftUI.cbx_ColorValueA.setVisible(True)
+        self.LabelCraftUI.cbx_ColorValueA.addItems(operation_options)
+        self.LabelCraftUI.cbx_ColorValueA.setCurrentText(operation_state)
+
+        self.LabelCraftUI.cbx_ColorValueA.currentTextChanged.connect(self.log_change)
+
+    def log_change(self):
+        self.node['operation'].setValue(str(self.LabelCraftUI.cbx_ColorValueA.currentText()))
+
+    # OCIOColorspace/ Colorpace Class function
     def colorspace_class(self):
         self.LabelCraftUI.grp_Colorspaces.setVisible(True)
         self.LabelCraftUI.grp_Colorspaces.setTitle('{} knobs'.format(self.node.Class()))
 
-        self.LabelCraftUI.cbx_ColorValueA.setVisible(False)
-        self.LabelCraftUI.cbx_ColorValueB.setVisible(False)
-        self.LabelCraftUI.btn_ColorspaceSwap.setVisible(False)
+        # self.LabelCraftUI.lbl_ColorValueA.setVisible(False)
+        # self.LabelCraftUI.lbl_ColorValueB.setVisible(False)
+        #
+        # self.LabelCraftUI.cbx_ColorValueA.setVisible(False)
+        # self.LabelCraftUI.cbx_ColorValueB.setVisible(False)
+        # self.LabelCraftUI.btn_ColorspaceSwap.setVisible(False)
 
-        if self.node.Class() == 'Log2Lin' or self.node.Class() == 'OCIOLogConvert':
-            self.currentClass = 'log'
+        if self.node.Class() == 'OCIOColorSpace':
+            self.current_node_class = 'OCIOColorSpace'
+            in_colorspace = int(self.node['in_colorspace'].getValue())
+            out_colorspace = int(self.node['out_colorspace'].getValue())
+            colorspace_options = self.node['in_colorspace'].values()
 
-            operation_state = str(self.node['operation'].value())
-            operation_options = self.node['operation'].values()
+        if self.node.Class() == 'Colorspace':
+            in_colorspace = int(self.node['colorspace_in'].getValue())
+            out_colorspace = int(self.node['colorspace_out'].getValue())
+            colorspace_options = self.node['colorspace_in'].values()
 
-            self.LabelCraftUI.cbx_ColorValueA.setVisible(True)
-            self.LabelCraftUI.cbx_ColorValueA.addItems(operation_options)
-            self.LabelCraftUI.cbx_ColorValueA.setCurrentText(operation_state)
+        cleanup_list = []
+        for item in colorspace_options:
+            if re.findall('\\t', item) :
+                g = item.split('\t')[1]
+                cleanup_list.append(g)
+            else :
+                cleanup_list.append(item)
 
-            self.LabelCraftUI.cbx_ColorValueA.currentTextChanged.connect(self.log_change)
+        self.LabelCraftUI.lbl_ColorValueA.setVisible(False)
+        self.LabelCraftUI.lbl_ColorValueB.setVisible(False)
 
-            self.SmartLabelUI.btn_ColorspaceSwap.clicked.connect(self.swap_colorspace)
+        self.LabelCraftUI.cbx_ColorValueA.setVisible(True)
+        self.LabelCraftUI.cbx_ColorValueB.setVisible(True)
+        self.LabelCraftUI.btn_ColorspaceSwap.setVisible(True)
 
-        else:
-            if self.node.Class() == 'OCIOColorSpace':
-                self.currentClass = 'OCIOColorSpace'
-                in_colorspace = int(self.node['in_colorspace'].getValue())
-                out_colorspace = int(self.node['out_colorspace'].getValue())
-                colorspace_options = self.node['in_colorspace'].values()
+        self.LabelCraftUI.cbx_ColorValueA.addItems(cleanup_list)
+        self.LabelCraftUI.cbx_ColorValueA.setCurrentIndex(in_colorspace)
 
-            if self.node.Class() == 'Colorspace':
-                in_colorspace = int(self.node['colorspace_in'].getValue())
-                out_colorspace = int(self.node['colorspace_out'].getValue())
-                colorspace_options = self.node['colorspace_in'].values()
+        self.LabelCraftUI.cbx_ColorValueB.addItems(cleanup_list)
+        self.LabelCraftUI.cbx_ColorValueB.setCurrentIndex(out_colorspace)
 
-            editList = []
-            for item in colorspace_options:
-                if re.findall('\\t', item) :
-                    g = item.split('\t')[1]
-                    editList.append(g)
-                else :
-                    editList.append(item)
-
-            self.LabelCraftUI.cbx_ColorValueA.setVisible(True)
-            self.LabelCraftUI.cbx_ColorValueB.setVisible(True)
-            self.LabelCraftUI.btn_ColorspaceSwap.setVisible(True)
-
-            self.LabelCraftUI.cbx_ColorValueA.addItems(editList)
-            self.LabelCraftUI.cbx_ColorValueA.setCurrentIndex(in_colorspace)
-
-            self.LabelCraftUI.cbx_ColorValueB.addItems(editList)
-            self.LabelCraftUI.cbx_ColorValueB.setCurrentIndex(out_colorspace)
-
-            self.LabelCraftUI.cbx_ColorValueA.currentTextChanged.connect(self.change_colorspace)
-            self.LabelCraftUI.cbx_ColorValueB.currentTextChanged.connect(self.change_colorspace)
-
-    def log_change(self):
-        self.node['operation'].setValue(str(self.LabelCraftUI.cbx_ColorValueA.currentText()))
+        self.LabelCraftUI.cbx_ColorValueA.currentTextChanged.connect(self.change_colorspace)
+        self.LabelCraftUI.cbx_ColorValueB.currentTextChanged.connect(self.change_colorspace)
+        self.LabelCraftUI.btn_ColorspaceSwap.clicked.connect(self.swap_colorspace)
 
     def change_colorspace(self):
         if self.node.Class() == 'OCIOColorSpace':
@@ -640,7 +642,11 @@ class LabelCraft:
             self.current_node_class = 'switch'
             self.switch_class()
 
-        elif self.node.Class() in ('Log2Lin', 'Colorspace', 'OCIOLogConvert', 'OCIOColorSpace'):
+        elif self.node.Class() in ('Log2Lin', 'OCIOLogConvert'):
+            self.current_node_class = 'log2lin'
+            self.log2lin_class()
+
+        elif self.node.Class() in ('Colorspace', 'OCIOColorSpace'):
             self.current_node_class = 'colorspace'
             self.colorspace_class()
 
@@ -655,7 +661,7 @@ class LabelCraft:
         else:
             for knob in self.node.knobs() :
                 if knob in ('size', 'defocus') :
-                    self.current_node_class = knob  # 'filter'
+                    self.current_node_class = knob
                     self.filter_class()
 
         # resize and show Widget Window

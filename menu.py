@@ -2,7 +2,7 @@ import main
 import nuke
 
 SHORTCUT = 'shift+q'
-ICON = 'SmartLabel.png'
+ICON = 'LabelCraft.png'
 
 toolbar = nuke.toolbar("Nodes")
 mainMenu = toolbar.addMenu("CQN Tools")
