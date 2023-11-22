@@ -16,6 +16,9 @@ from PySide2.QtWidgets import QFontComboBox
 
 class LabelCraft:
     def __init__(self):
+        """
+            Start UI
+        """
         dir_path = os.path.dirname(__file__)
         path_ui = '/'.join([dir_path, __title__ + '.ui'])
 
