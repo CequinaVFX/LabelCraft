@@ -50,10 +50,11 @@ class SetLabel():
 
 
 
-def run():
+def get_selection():
     node = nuke.selectedNode()
-    global runTool
-    runTool = SetLabel().get_nodes()
+    global label
+    label = LabelCraft()
+    label.edit_node(node)
 
     '''
     nodes = nuke.selectedNodes()
