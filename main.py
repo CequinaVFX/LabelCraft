@@ -684,6 +684,11 @@ class LabelCraft:
 
 
 def get_selection():
+    """
+        First function
+    Returns:
+
+    """
     nodes = nuke.selectedNodes()
     if len(nodes) != 0:
         global runTool
