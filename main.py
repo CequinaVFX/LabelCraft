@@ -1,8 +1,8 @@
 __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
-__version__ = '1.0.0'
-__release_date__ = 'November, 24 2023'
+__version__ = '1.0.1'
+__release_date__ = 'November, 26 2023'
 __license__ = 'MIT'
 
 
@@ -13,13 +13,24 @@ from PySide2 import QtUiTools, QtCore, QtGui
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QFontComboBox
 
+ICON_SELECTION = ['none', 'Axis', 'Add', 'Bezier', 'Camera',
+                  'Color', 'ColorAdd', 'ColorBars', 'ColorCorrect', 'ColorLookup',
+                  'ColorSpace', 'CornerPin', 'Crop', 'Cube', 'Color', 'CheckerBoard',
+                  'Dot', 'EnvironMaps', 'Exposure', 'Expression', 'FloodFill',
+                  'Input', 'ImageModeler', 'Keyer', 'Light', 'MarkerRemoval',
+                  'Merge', 'Modify', 'Output', 'Position', 'Primatte', 'Read',
+                  'Render', 'RotoPaint', 'Shuffle', 'Sphere',
+                  'TimeClip', 'Tracker', 'Viewer', 'Write']
+
+print('\n' * 20)
+
 
 class LabelCraft:
     def __init__(self):
         """
             Start UI
         """
-        dir_path = os.path.dirname(__file__)
+        dir_path = 'B:/_CQNTools_/LabelCraft'  # os.path.dirname(__file__)
         path_ui = '/'.join([dir_path, __title__ + '.ui'])
 
         self.LabelCraftUI = QtUiTools.QUiLoader().load(path_ui)
@@ -59,8 +70,13 @@ class LabelCraft:
         ##########################################################################################
 
     # Label Knob
-    def label_class(self, node):
-        self.current_label = node['label'].value()
+    def label_knob(self, node):
+        if self.current_node_class in ('backdropnode', 'stickynote'):
+            self.current_label = node['label'].value()
+            self.align_state, self.icon_state = self.get_html()
+        else:
+            self.current_label = node['label'].value()
+
         self.LabelCraftUI.edt_NodeLabel.setText(self.current_label)
         self.LabelCraftUI.edt_NodeLabel.selectAll()
         self.LabelCraftUI.edt_NodeLabel.setTabChangesFocus(True)
@@ -77,7 +93,22 @@ class LabelCraft:
 
     def change_label(self):
         new_label = self.LabelCraftUI.edt_NodeLabel.toPlainText()
-        self.node['label'].setValue(new_label)
+
+        if self.current_node_class in ('backdropnode', 'stickynote'):
+            new_align = '<{}>'.format(str(self.LabelCraftUI.cbx_InfoAlign.currentText()))
+            new_icon = str(self.LabelCraftUI.cbx_InfoIcon.currentText())
+
+            if new_icon == 'none':
+                new_icon = ''
+            else:
+                new_icon = '<img src = "{}.png">'.format(new_icon)
+
+            encode_label = new_label.encode('ascii', errors='ignore').decode('utf-8')
+
+            self.node['label'].setValue('{}{}{}'.format(new_align, new_icon, encode_label))
+
+        else:
+            self.node['label'].setValue(new_label)
 
     def change_node_color(self):
         old_color = self.node['tile_color'].value()
@@ -119,17 +150,19 @@ class LabelCraft:
         self.node['bookmark'].setValue(self.LabelCraftUI.ckx_Bookmark.checkState())
 
     def get_layers(self):
-        standard_layers = ['rgb', 'rgba', 'alpha']
+        # standard_layers = ['rgb', 'rgba', 'alpha']
 
-        extended_layer_list = []
-        for layer in nuke.layers(self.node):
-            # if layer not in standard_layers:
-            extended_layer_list.append(layer)
+        # extended_layer_list = []
+        # for layer in nuke.layers(self.node):
+        #     # if layer not in standard_layers:
+        #     extended_layer_list.append(layer)
+        #
+        # if sorted(standard_layers) == sorted(extended_layer_list):
+        #     return None  # sorted(standard_layers)
+        # else:
+        #     return sorted(extended_layer_list)
 
-        if sorted(standard_layers) == sorted(extended_layer_list):
-            return None  # sorted(standard_layers)
-        else:
-            return sorted(extended_layer_list)
+        return sorted(nuke.layers(self.node))
 
     # Read Class functions
     def read_class(self):
@@ -145,12 +178,12 @@ class LabelCraft:
         self.LabelCraftUI.btn_Shuffle.setVisible(False)
 
         valid_layers = self.get_layers()
-        if valid_layers:
-            self.LabelCraftUI.lbl_ReadChannels.setVisible(True)
-            self.LabelCraftUI.cbx_Channels.setVisible(True)
-            self.LabelCraftUI.btn_Shuffle.setVisible(True)
-            self.LabelCraftUI.cbx_Channels.addItems(valid_layers)
-            self.LabelCraftUI.btn_Shuffle.clicked.connect(self.shuffle_layer)
+        # if valid_layers:
+        self.LabelCraftUI.lbl_ReadChannels.setVisible(True)
+        self.LabelCraftUI.cbx_Channels.setVisible(True)
+        self.LabelCraftUI.btn_Shuffle.setVisible(True)
+        self.LabelCraftUI.cbx_Channels.addItems(valid_layers)
+        self.LabelCraftUI.btn_Shuffle.clicked.connect(self.shuffle_layer)
 
         self.LabelCraftUI.cbx_Colorspace.currentTextChanged.connect(self.change_read_colorspace)
 
@@ -161,12 +194,12 @@ class LabelCraft:
         self.LabelCraftUI.btn_Shuffle.setVisible(False)
 
         valid_layers = self.get_layers()
-        if valid_layers:
-            self.LabelCraftUI.lbl_ReadChannels.setVisible(True)
-            self.LabelCraftUI.cbx_Channels.setVisible(True)
-            # self.LabelCraftUI.btn_Shuffle.setVisible(True)
-            self.LabelCraftUI.cbx_Channels.addItems(valid_layers)
-            self.LabelCraftUI.btn_Shuffle.clicked.connect(self.shuffle_layer)
+        # if valid_layers:
+        self.LabelCraftUI.lbl_ReadChannels.setVisible(True)
+        self.LabelCraftUI.cbx_Channels.setVisible(True)
+        # self.LabelCraftUI.btn_Shuffle.setVisible(True)
+        self.LabelCraftUI.cbx_Channels.addItems(valid_layers)
+        self.LabelCraftUI.btn_Shuffle.clicked.connect(self.shuffle_layer)
 
         self.LabelCraftUI.cbx_Colorspace.currentTextChanged.connect(self.change_shuffle_channel)
 
@@ -182,7 +215,6 @@ class LabelCraft:
 
     def shuffle_layer(self):
         chosen_layer = str(self.LabelCraftUI.cbx_Channels.currentText())
-        print(chosen_layer)
         node_outputs = nuke.dependentNodes(nuke.INPUTS | nuke.HIDDEN_INPUTS | nuke.EXPRESSIONS, [self.node])
 
         shuffle_node = nuke.nodes.Shuffle(name="Shuffle_" + chosen_layer)
@@ -324,20 +356,17 @@ class LabelCraft:
         self.LabelCraftUI.cbx_RotoOutput.addItems(valid_layers)
 
         output_state = self.node['output'].value()
-        print('out ', output_state)
         self.LabelCraftUI.cbx_RotoOutput.setCurrentText(output_state)
 
         self.LabelCraftUI.cbx_RotoPremult.addItems(valid_layers)
 
         premult_state = self.node['premultiply'].value()
-        print('prem ', premult_state)
         self.LabelCraftUI.cbx_RotoPremult.setCurrentText(premult_state)
 
         clip_options = self.node['cliptype'].values()
         self.LabelCraftUI.cbx_RotoCliptype.addItems(clip_options)
 
         clip_state = self.node['cliptype'].value()
-        print('clip ', clip_state)
         self.LabelCraftUI.cbx_RotoCliptype.setCurrentText(clip_state)
 
         # set signals
@@ -507,46 +536,143 @@ class LabelCraft:
     # Dot/ Backdrop/ StickyNote Class function
     def info_class(self):
         self.LabelCraftUI.grp_Info.setVisible(True)
-        self.LabelCraftUI.grp_Info.setTitle('info knobs')
+        self.LabelCraftUI.grp_Info.setTitle('{} knobs'.format(self.node.Class()))
 
-        self.LabelCraftUI.fnt_FontFace.setFontFilters(QFontComboBox.MonospacedFonts)
+        # self.LabelCraftUI.fnt_FontFace.setFontFilters(QFontComboBox.NonScalableFonts)
 
-        # self.LabelCraftUI.lbl_Font.setVisible(False)
-        # self.LabelCraftUI.fnt_FontFace.setVisible(False)
         self.LabelCraftUI.lbl_InfoAlign.setVisible(False)
         self.LabelCraftUI.cbx_InfoAlign.setVisible(False)
+
         self.LabelCraftUI.lbl_InfoIcon.setVisible(False)
         self.LabelCraftUI.cbx_InfoIcon.setVisible(False)
+
         self.LabelCraftUI.lbl_InfoZOrder.setVisible(False)
         self.LabelCraftUI.spn_InfoZOrder.setVisible(False)
 
-        if self.current_node_class in ('backdrop', 'stickynote'):
+        note_font_state = self.node['note_font'].value()
+        note_size_state = self.node['note_font_size'].value()
+
+        if 'Bold' in note_font_state:
+            self.LabelCraftUI.ckx_InfoBold.setChecked(True)
+            note_font_state = note_font_state.replace('Bold', '')
+
+        if 'Italic' in note_font_state:
+            self.LabelCraftUI.ckx_InfoItalic.setChecked(True)
+            note_font_state = note_font_state.replace('Italic', '')
+
+        self.LabelCraftUI.fnt_FontFace.setCurrentFont(note_font_state)
+        self.LabelCraftUI.spn_InfoFontSize.setRange(5, 350)
+        self.LabelCraftUI.spn_InfoFontSize.setValue(note_size_state)
+
+        self.LabelCraftUI.fnt_FontFace.currentFontChanged.connect(self.change_font_family)
+        self.LabelCraftUI.spn_InfoFontSize.valueChanged.connect(self.change_font_size)
+        self.LabelCraftUI.ckx_InfoBold.stateChanged.connect(self.change_bold_status)
+        self.LabelCraftUI.ckx_InfoItalic.stateChanged.connect(self.change_italic_status)
+        self.LabelCraftUI.btn_FontColor.clicked.connect(self.change_font_color)
+
+        if self.current_node_class in ('backdropnode', 'stickynote'):
+            # align_state, icon_state = self.get_html()
             self.LabelCraftUI.lbl_InfoAlign.setVisible(True)
             self.LabelCraftUI.cbx_InfoAlign.setVisible(True)
             self.LabelCraftUI.lbl_InfoIcon.setVisible(True)
             self.LabelCraftUI.cbx_InfoIcon.setVisible(True)
-            if self.current_node_class == 'backdrop':
-                self.LabelCraftUI.spn_InfoZOrder.setVisible(True)
 
+            self.LabelCraftUI.cbx_InfoAlign.addItems(['left', 'center'])
+            self.LabelCraftUI.cbx_InfoAlign.setCurrentText(self.align_state)
+            self.LabelCraftUI.cbx_InfoIcon.addItems(ICON_SELECTION)
+            self.LabelCraftUI.cbx_InfoIcon.setCurrentText(self.icon_state)
+
+            self.LabelCraftUI.cbx_InfoAlign.currentTextChanged.connect(self.change_label)
+            self.LabelCraftUI.cbx_InfoIcon.currentTextChanged.connect(self.change_label)
+
+    def get_html(self):
+
+        align_pattern = r'(<left>|<center>|<right>)'
+        img_pattern = r'(?P<icon><img .*?>)'
+        png_pattern = r'"(.*?.png)'
+
+        alignment = None
+        icon = None
+
+        align_search = re.match(align_pattern, self.current_label)
+        icon_search = re.findall(img_pattern, self.current_label)
+        png_search = re.findall(png_pattern, self.current_label)
+
+        if align_search:
+            self.current_label = re.sub(align_pattern, '', self.current_label)
+            alignment = align_search.group().replace('<', '').replace('>', '')
+
+        if icon_search:
+            icon = png_search[0].replace('.png', '')
+            self.current_label = re.sub(img_pattern, '', self.current_label)
+
+        return alignment, icon
+
+    def info_class_backup(self):
+        self.LabelCraftUI.grp_Info.setVisible(True)
+        self.LabelCraftUI.grp_Info.setTitle('{} knobs'.format(self.node.Class()))
+
+        # self.LabelCraftUI.fnt_FontFace.setFontFilters(QFontComboBox.NonScalableFonts)
+
+        self.LabelCraftUI.cbx_InfoAlign.addItems(['left', 'center', 'right'])
+        self.LabelCraftUI.cbx_InfoIcon.addItems(ICON_SELECTION)
+
+        self.LabelCraftUI.lbl_InfoAlign.setVisible(False)
+        self.LabelCraftUI.cbx_InfoAlign.setVisible(False)
+
+        self.LabelCraftUI.lbl_InfoIcon.setVisible(False)
+        self.LabelCraftUI.cbx_InfoIcon.setVisible(False)
+
+        self.LabelCraftUI.lbl_InfoZOrder.setVisible(False)
+        self.LabelCraftUI.spn_InfoZOrder.setVisible(False)
+
+        if self.current_node_class in ('backdropnode', 'stickynote'):
+            print('chosen class ', self.current_node_class)
+            self.LabelCraftUI.lbl_InfoAlign.setVisible(True)
+            self.LabelCraftUI.cbx_InfoAlign.setVisible(True)
+            self.LabelCraftUI.lbl_InfoIcon.setVisible(True)
+            self.LabelCraftUI.cbx_InfoIcon.setVisible(True)
+            if self.current_node_class == 'backdropnode':
+                # self.LabelCraftUI.spn_InfoZOrder.setVisible(True)
+                order_state = int(self.node['z_order'].value())
+                self.LabelCraftUI.lbl_InfoZOrder.setVisible(True)
+                self.LabelCraftUI.spn_InfoZOrder.setVisible(True)
+                self.LabelCraftUI.spn_InfoZOrder.setRange(-50, 50)
+                self.LabelCraftUI.spn_InfoZOrder.setValue(order_state)
 
         # self.LabelCraftUI.cbx_InfoAlign.currentTextChanged.connect(self.change_Alignment)
-
 
         # set standard values
         align = 'center'
         icon = 'none'
 
-        check_html = re.findall('<(.*?)>', self.current_label)
+        align_pattern = r'(?P<align><left>|<center>|<right>)'
+        img_pattern = r'(?P<icon><img .*?>)'
+        png_pattern = r'"(.*?).png'
 
-        try :
-            align = check_html[0]
-        except :
-            align = 'center'
+        align_search = re.match(align_pattern, self.current_label)  # findall
+        icon_search = re.findall(img_pattern, self.current_label)
+        png_search = re.findall(png_pattern, self.current_label)
 
-        try :
-            icon = re.findall('"(.*?).png', check_html[1])[0]
-        except :
-            icon = 'none'
+        print()
+
+        if align_search:
+            print('found align')
+            _align = align_search.group().replace('<', '').replace('>', '')
+            print('align ', _align, align_search.group(), type(align_search), type(align_search.group()))
+            self.LabelCraftUI.cbx_InfoAlign.setCurrentText(_align)
+        else:
+            print('no align')
+            self.LabelCraftUI.cbx_InfoAlign.setCurrentText('center')
+
+        if icon_search:
+            print('found icon')
+            print('icon ', icon_search[0], type(icon_search), type(icon_search[0]))
+            print('png ', png_search[0], type(png_search), type(png_search[0]))
+            self.LabelCraftUI.cbx_InfoIcon.setCurrentText('Color')
+        else:
+            print('no icon and png')
+            self.LabelCraftUI.cbx_InfoIcon.setCurrentText('none')
 
         # self.LabelCraftUI.cbx_InfoAlign.addItems(INFO_ALIGN)
         self.LabelCraftUI.cbx_InfoAlign.setCurrentText(align)
@@ -554,12 +680,6 @@ class LabelCraft:
         self.LabelCraftUI.cbx_InfoIcon.setCurrentText(icon)
         # self.LabelCraftUI.lbl_InfoZOrder.setVisible(False)
         # self.LabelCraftUI.spn_InfoZOrder.setVisible(False)
-
-        try :
-            self.current_label = self.current_label.replace('<%s>' % check_html[0], '')
-            self.current_label = self.current_label.replace('<%s>' % check_html[1], '')
-        except :
-            pass
 
         self.LabelCraftUI.edt_NodeLabel.setText(self.current_label)
         self.LabelCraftUI.edt_NodeLabel.selectAll()
@@ -571,20 +691,20 @@ class LabelCraft:
         note_font_state = self.node['note_font'].value()
         print('current font ', note_font_state)
 
-        try:
-            bold = re.findall('Bold', note_font_state)[0]
-        except:
-            bold = False
+        # try:
+        #     bold = re.findall('Bold', note_font_state)[0]
+        # except:
+        #     bold = False
+        #
+        # try:
+        #     italic = re.findall('Italic', note_font_state)[0]
+        # except:
+        #     italic = False
 
-        try:
-            italic = re.findall('Italic', note_font_state)[0]
-        except:
-            italic = False
-
-        if bold :
-            self.LabelCraftUI.ckx_InfoBold.setChecked(True)
-        if italic :
-            self.LabelCraftUI.ckx_InfoItalic.setChecked(True)
+        # if bold :
+        #     self.LabelCraftUI.ckx_InfoBold.setChecked(True)
+        # if italic :
+        #     self.LabelCraftUI.ckx_InfoItalic.setChecked(True)
 
         if 'z_order' in self.node.knobs() :
             order_state = int(self.node['z_order'].value())
@@ -605,45 +725,62 @@ class LabelCraft:
         italic = re.findall('Italic', current_note_font)
 
         if bold :
-            self.LabelCraftUI.ckx_DotBold.setChecked(True)
+            self.LabelCraftUI.ckx_InfoBold.setChecked(True)
         if italic :
-            self.LabelCraftUI.ckx_DotItalic.setChecked(True)
+            self.LabelCraftUI.ckx_InfoItalic.setChecked(True)
 
         # Signals
         self.LabelCraftUI.spn_DotFontSize.valueChanged.connect(self.change_dot)
-        self.LabelCraftUI.ckx_DotBold.stateChanged.connect(self.change_bold)
-        self.LabelCraftUI.ckx_DotItalic.stateChanged.connect(self.change_italic)
+        self.LabelCraftUI.ckx_InfoBold.stateChanged.connect(self.change_bold)
+        self.LabelCraftUI.ckx_InfoItalic.stateChanged.connect(self.change_italic)
 
-    def change_dot(self):
-        self.node['note_font_size'].setValue(self.LabelCraftUI.spn_DotFontSize.value())
+    def change_font_family(self):
+        new_font = str(self.LabelCraftUI.fnt_FontFace.currentFont().family())
 
-    def change_bold(self):
-        note_state = self.node['note_font'].value()
+        if self.LabelCraftUI.ckx_InfoBold.checkState():
+            new_font = '{} Bold'.format(new_font)
 
-        if self.LabelCraftUI.ckx_DotBold.checkState():
+        if self.LabelCraftUI.ckx_InfoItalic.checkState():
+            new_font = '{} Bold'.format(new_font)
+
+        self.node['note_font'].setValue(new_font)
+
+    def change_font_size(self):
+        self.node['note_font_size'].setValue(self.LabelCraftUI.spn_InfoFontSize.value())
+
+    def change_bold_status(self):
+        note_state = self.LabelCraftUI.fnt_FontFace.currentFont().family()
+
+        if self.LabelCraftUI.ckx_InfoBold.checkState():
             if 'Italic' in note_state:
-                self.node['note_font'].setValue('Verdana Bold Italic')
+                self.node['note_font'].setValue('{} Bold Italic'.format(note_state))
 
             else:
-                self.node['note_font'].setValue('Verdana Bold')
+                self.node['note_font'].setValue('{} Bold'.format(note_state))
 
         else:
             note_state = note_state.replace(' Bold', '')
             self.node['note_font'].setValue(note_state)
 
-    def change_italic(self):
-        note_state = self.node['note_font'].value()
+    def change_italic_status(self):
+        note_state = self.LabelCraftUI.fnt_FontFace.currentFont().family()
 
-        if self.LabelCraftUI.ckx_DotItalic.checkState():
+        if self.LabelCraftUI.ckx_InfoItalic.checkState():
             if 'Bold' in note_state:
-                self.node['note_font'].setValue('Verdana Bold Italic')
+                self.node['note_font'].setValue('{} Bold Italic'.format(note_state))
 
             else:
-                self.node['note_font'].setValue('Verdana Italic')
+                self.node['note_font'].setValue('{} Italic'.format(note_state))
 
         else:
             note_state = note_state.replace(' Italic', '')
             self.node['note_font'].setValue(note_state)
+
+    def change_font_color(self):
+        old_color = self.node['note_font_color'].value()
+        new_color = nuke.getColor(old_color)
+        print(new_color)
+        self.node['note_font_color'].setValue(new_color)
 
     # Filter Class
     def filter_class(self):
@@ -659,8 +796,9 @@ class LabelCraft:
 
         """
         self.node = node  # make it universal
+        self.current_node_class = self.node.Class().lower()
 
-        self.label_class(self.node)
+        self.label_knob(self.node)
         self.common_knobs(self.node)
 
         if self.node.Class() in ('Tracker4', 'Tracker3'):
@@ -715,8 +853,8 @@ class LabelCraft:
 
         # resize and show Widget Window
         self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Popup)
-        self.LabelCraftUI.move(QtGui.QCursor.pos() + QtCore.QPoint())
-
+        # self.LabelCraftUI.move(QtGui.QCursor.pos() + QtCore.QPoint())
+        self.LabelCraftUI.move(1600, 900)
         self.LabelCraftUI.edt_NodeLabel.setFocusPolicy(Qt.StrongFocus)
         self.LabelCraftUI.edt_NodeLabel.setFocus()
         self.LabelCraftUI.adjustSize()
@@ -750,7 +888,6 @@ def get_selection():
 
 
 if __name__ == '__main__':
-    print('newest version! ')
     get_selection()
     # ll = ['Tracker', 'Blur']  # , 'Defocus', 'Dilate', 'FilterErode', 'Erode', 'Sharpen', 'Soften']
     # node = random.choice(ll)
