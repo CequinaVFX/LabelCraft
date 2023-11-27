@@ -6,4 +6,4 @@ ICON = 'LabelCraft.png'
 
 toolbar = nuke.toolbar("Nodes")
 mainMenu = toolbar.addMenu("CQN Tools")
-mainMenu.addCommand('LabelCraft', 'main.get_selection()', SHORTCUT, icon=ICON)
+mainMenu.addCommand('LabelCraft', 'main.edit_label()', SHORTCUT, icon=ICON)
