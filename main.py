@@ -1,8 +1,8 @@
 __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
-__version__ = '1.0.1'
-__release_date__ = 'November, 26 2023'
+__version__ = '1.0.4'
+__release_date__ = 'January, 10 2024'
 __license__ = 'MIT'
 
 
@@ -28,7 +28,8 @@ class LabelCraft:
         """
             Start UI
         """
-        dir_path = 'B:/_CQNTools_/LabelCraft'  # os.path.dirname(__file__)
+        # dir_path = 'B:/_CQNTools_/LabelCraft'  # os.path.dirname(__file__)
+        dir_path = os.path.dirname(__file__)
         path_ui = '/'.join([dir_path, __title__ + '.ui'])
 
         self.LabelCraftUI = QtUiTools.QUiLoader().load(path_ui)
@@ -81,11 +82,11 @@ class LabelCraft:
 
         if self.current_node_class in ('backdropnode', 'stickynote', 'dot'):
             encode_label = new_label.encode('ascii', errors='ignore').decode('utf-8')
-            label_dict = {'label' : encode_label,
-                          'icon' : '',
-                          'bold' : '',
-                          'italic' : '',
-                          'align' : ''}
+            label_dict = {'label': encode_label,
+                          'icon': '',
+                          'bold': '',
+                          'italic': '',
+                          'align': ''}
 
             new_align = '<{}>'.format(str(self.LabelCraftUI.cbx_InfoAlign.currentText()))
             new_icon = str(self.LabelCraftUI.cbx_InfoIcon.currentText())
@@ -231,7 +232,7 @@ class LabelCraft:
             shuffle_node.setInput(0, self.node)
 
     # Tracker Class functions
-    def tracker_class(self) :
+    def tracker_class(self):
         # set group to visible and edit the group's name
         self.LabelCraftUI.grp_Tracker.setVisible(True)
         self.LabelCraftUI.grp_Tracker.setTitle('Tracker knobs')
@@ -254,16 +255,16 @@ class LabelCraft:
 
     def get_tracks_names(self):
         n = self.node["tracks"].toScript()
-        rows = n.split("\n")[34 :]
+        rows = n.split("\n")[34:]
 
         trackers = []
-        for i in rows :
-            try :
-                track_name = i.split("}")[1].split("{")[0][2 :-2]
-                if track_name != "" :
+        for i in rows:
+            try:
+                track_name = i.split("}")[1].split("{")[0][2:-2]
+                if track_name != "":
                     trackers.append(track_name)
                     print(track_name)
-            except :
+            except:
                 continue
 
         # return trackers
@@ -274,12 +275,12 @@ class LabelCraft:
     def change_transform(self):
         self.node['transform'].setValue(str(self.LabelCraftUI.cbx_TrackerTransform.currentText()))
 
-    def press_get_current_frame(self) :
+    def press_get_current_frame(self):
         self.LabelCraftUI.spn_TrackerRefFrame.setValue(nuke.frame())
         self.node['reference_frame'].setValue(nuke.frame())
 
     # Merge Class functions
-    def merge_class(self) :
+    def merge_class(self):
         # set group to visible and edit the group's name
         self.LabelCraftUI.grp_Merge.setVisible(True)
         self.LabelCraftUI.grp_Merge.setTitle('{} knobs'.format(self.node.Class()))
@@ -290,7 +291,7 @@ class LabelCraft:
         self.LabelCraftUI.cbx_MergeOperation.setCurrentText('no operation for Keymix')
 
         # only enable operation knob when exists
-        if 'operation' in self.node.knobs() :
+        if 'operation' in self.node.knobs():
             self.current_node_class = 'merge'
             self.LabelCraftUI.cbx_MergeOperation.setEnabled(True)
 
@@ -343,7 +344,7 @@ class LabelCraft:
         self.node['mix'].setValue(new_mix)
 
     # Roto/ RotoPaint Class functions
-    def roto_class(self) :
+    def roto_class(self):
         self.LabelCraftUI.grp_Roto.setVisible(True)
         self.LabelCraftUI.grp_Roto.setTitle(self.node.Class())
 
@@ -405,15 +406,15 @@ class LabelCraft:
         self.LabelCraftUI.spn_SwitchValueB.setRange(1, 1000000)
         self.LabelCraftUI.spn_SwitchValueB.setValue(standard_value_b)
 
-        if self.LabelCraftUI.ckx_SwitchExpression.checkState() :
+        if self.LabelCraftUI.ckx_SwitchExpression.checkState():
             self.LabelCraftUI.edt_SwitchWhich.setEnabled(False)
             self.LabelCraftUI.cbx_SwitchExpression.setEnabled(True)
             self.LabelCraftUI.spn_SwitchValueA.setEnabled(True)
             self.LabelCraftUI.spn_SwitchValueA.setVisible(True)
-            if expression_state.startswith('inrange') :
+            if expression_state.startswith('inrange'):
                 self.LabelCraftUI.spn_SwitchValueB.setEnabled(True)
                 self.LabelCraftUI.spn_SwitchValueB.setVisible(True)
-        else :
+        else:
             self.LabelCraftUI.edt_SwitchWhich.setEnabled(True)
             self.LabelCraftUI.cbx_SwitchExpression.setEnabled(False)
 
@@ -442,7 +443,7 @@ class LabelCraft:
     def log_change(self):
         self.node['operation'].setValue(str(self.LabelCraftUI.cbx_ColorValueA.currentText()))
 
-    # OCIOColorspace/ Colorpace Class function
+    # OCIOColorspace/ Colorspace Class function
     def colorspace_class(self):
         self.LabelCraftUI.grp_Colorspaces.setVisible(True)
         self.LabelCraftUI.grp_Colorspaces.setTitle('{} knobs'.format(self.node.Class()))
@@ -467,10 +468,10 @@ class LabelCraft:
 
         cleanup_list = []
         for item in colorspace_options:
-            if re.findall('\\t', item) :
+            if re.findall('\\t', item):
                 g = item.split('\t')[1]
                 cleanup_list.append(g)
-            else :
+            else:
                 cleanup_list.append(item)
 
         self.LabelCraftUI.lbl_ColorValueA.setVisible(False)
@@ -626,9 +627,9 @@ class LabelCraft:
         bold = re.findall('Bold', current_note_font)
         italic = re.findall('Italic', current_note_font)
 
-        if bold :
+        if bold:
             self.LabelCraftUI.ckx_InfoBold.setChecked(True)
-        if italic :
+        if italic:
             self.LabelCraftUI.ckx_InfoItalic.setChecked(True)
 
         # Signals
@@ -726,8 +727,8 @@ class LabelCraft:
         #     self.dot_class()
 
         else:
-            for knob in self.node.knobs() :
-                if knob in ('size', 'defocus') :
+            for knob in self.node.knobs():
+                if knob in ('size', 'defocus'):
                     self.current_node_class = knob
                     self.filter_class()
 
@@ -749,4 +750,3 @@ def edit_label():
 
 if __name__ == '__main__':
     edit_label()
-
