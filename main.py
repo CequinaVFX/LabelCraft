@@ -1,17 +1,18 @@
 __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
-__version__ = '1.0.4'
-__release_date__ = 'January, 10 2024'
+__version__ = '1.0.6'
+__release_date__ = 'December, 22 2024'
 __license__ = 'MIT'
 
-
-import nuke
-import os.path
 import re
+import nuke
+import time
+import os.path
+
 from PySide2 import QtUiTools, QtCore, QtGui
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QFontComboBox, QStyleFactory
+from PySide2.QtWidgets import QFontComboBox, QStyleFactory, QDesktopWidget
 
 """
 I made a selection of some Nuke's standard icons here, few free to add as many as you want.
@@ -40,51 +41,56 @@ def get_selection():
     return None
 
 
-def get_html_tags(label):
+def split_html(html_tags):
     align_pattern = r'(<p align=\"(?P<align>left|center|right)\">)'
     bold_pattern = r'(?P<bold><b>)'
     italic_pattern = r'(?P<italic><i>)'
-    icon_pattern = r'src=\"(?P<icon>.*?).png\"'
-    tags_pattern = r'<.*>'
+    icon_pattern = r'(src ?= ?\"(?P<icon>.*?).png\")'
 
-    align, icon = 'center', 'none'
-    bold, italic = False, False
+    align = 'center'
+    bold = True
+    italic = True
+    icon = "none"
 
-    align_search = re.search(align_pattern, label)
+    align_search = re.search(align_pattern, html_tags)
     if align_search:
-        # print(align_search)
-        # print(align_search.group('align'))
         align = align_search.group('align')
-    # else:
-    #     print('no align')
-    #     pass
 
-    bold_search = re.search(bold_pattern, label)
+    bold_search = re.search(bold_pattern, html_tags)
     if bold_search:
-        # print(bold_search.group('bold'))
         bold = True
-    # else:
-    #     print('no bold')
-    #     pass
+    else:
+        bold = False
 
-    italic_search = re.search(italic_pattern, label)
+    italic_search = re.search(italic_pattern, html_tags)
     if italic_search:
-        print(italic_search.group('italic'))
         italic = True
-    # else:
-    #     print('no italic')
+    else:
+        italic = False
 
-    icon_search = re.search(icon_pattern, label)
+    icon_search = re.search(icon_pattern, html_tags)
     if icon_search:
-        print(icon_search.group('icon'))
         icon = icon_search.group('icon')
-    # else:
-    #     icon = 'none'
-    #     print('no icon')
 
-    clean_label = re.sub(tags_pattern, '', label)
+    return {'align': align,
+            'bold': bold,
+            'italic': italic,
+            'icon': icon}
 
-    return clean_label, align, bold, italic, icon
+
+def split_label(current_label):
+    html_pattern = r'(?P<HTML>\<.*\>)(?P<label>.*)'
+    html_search = re.search(html_pattern, current_label)
+    if html_search:
+        html_tags = split_html(html_search.group('HTML'))
+        return html_tags, html_search.group('label')
+
+    else:
+        return ({'align': 'center',
+                 'bold': True,
+                 'italic': True,
+                 'icon': "none"},
+                current_label)
 
 
 def get_layers(node):
@@ -120,11 +126,11 @@ class LabelCraft:
         # create Class attributes
         self.node = None
         self.current_label = None
+        self.html_tags = {'align': 'center',
+                          'bold': True,
+                          'italic': True,
+                          'icon': 'none'}
         self.current_node_class = 'none'
-        self.align_state = 'center'
-        self.italic = None
-        self.bold = None
-        self.icon = 'none'
 
         # Set all groups to invisible and show the node.Class() related
         self.LabelCraftUI.grp_Read.setVisible(False)
@@ -145,7 +151,10 @@ class LabelCraft:
 
     # Label Knob
     def label_knob(self, node):
-        self.current_label = node['label'].value()
+        if self.current_node_class == 'backdropnode':
+            self.html_tags, self.current_label = split_label(node['label'].value())
+        else:
+            self.current_label = node['label'].value()
 
         self.LabelCraftUI.edt_NodeLabel.setText(self.current_label)
         self.LabelCraftUI.edt_NodeLabel.selectAll()
@@ -168,22 +177,14 @@ class LabelCraft:
                           'italic'  : '',
                           'align'   : ''}
 
-            # self.current_label, self.align_state, self.bold, self.italic, self.icon = get_html_tags(self.current_label)
-
             new_align = '<p align="{}">'.format(str(self.LabelCraftUI.cbx_InfoAlign.currentText()))
             new_icon = str(self.LabelCraftUI.cbx_InfoIcon.currentText())
-            # new_align = '<p align="{}">'.format(str(self.align_state))
-            # new_icon = str(self.icon)
 
             label_data['align'] = new_align
-            print('new align ', new_align)
-            print('selected icon ', new_icon)
 
             if new_icon == 'none':
-                print('no icon')
                 label_data['icon'] = ''
             else:
-                print('icon {}'.format(new_icon))
                 label_data['icon'] = '<img src="{}.png" width="48">'.format(new_icon)
 
             if self.LabelCraftUI.ckx_InfoBold.checkState():
@@ -460,8 +461,7 @@ class LabelCraft:
         self.node['cliptype'].setValue(new_cliptype)
 
     def change_replace(self):
-        new_replace_state = self.LabelCraftUI.ckx_RotoReplace.checkState()
-        self.node['replace'].setValue(new_replace_state)
+        self.node['replace'].setValue(self.LabelCraftUI.ckx_RotoReplace.checkState())
 
     # Switch/ Dissolve Class function
     def switch_class(self):
@@ -611,10 +611,11 @@ class LabelCraft:
         self.LabelCraftUI.grp_Info.setTitle('{} knobs'.format(self.node.Class()))
 
         # lab = self.current_label
-        self.current_label, self.align_state, self.bold, self.italic, self.icon = get_html_tags(self.current_label)
-        print(self.current_label, self.align_state, self.bold, self.italic, self.icon)
+        # self.align_state, self.bold, self.italic, self.icon = get_html_tags(self.current_label)
+        # print(self.current_label, self.align_state, self.bold, self.italic, self.icon)
 
-        self.LabelCraftUI.edt_NodeLabel.setText(self.current_label)
+        # self.LabelCraftUI.edt_NodeLabel.setText(self.current_label)
+        # print('new label ', self.current_label)
         # self.LabelCraftUI.fnt_FontFace.setFontFilters(QFontComboBox.NonScalableFonts)
 
         self.LabelCraftUI.lbl_InfoAlign.setVisible(False)
@@ -629,12 +630,13 @@ class LabelCraft:
         note_font_state = self.node['note_font'].value()
         note_size_state = self.node['note_font_size'].value()
 
-        if 'Bold' in note_font_state:
+        # clear bold and italic from note_font knob
+        if self.html_tags['bold']:
             self.LabelCraftUI.ckx_InfoBold.setChecked(True)
             note_font_state = note_font_state.replace('Bold', '')
             self.node['note_font'].setValue(note_font_state)
 
-        if 'Italic' in note_font_state:
+        if self.html_tags['italic']:
             self.LabelCraftUI.ckx_InfoItalic.setChecked(True)
             note_font_state = note_font_state.replace('Italic', '')
             self.node['note_font'].setValue(note_font_state)
@@ -651,9 +653,9 @@ class LabelCraft:
             self.LabelCraftUI.cbx_InfoIcon.setVisible(True)
 
             self.LabelCraftUI.cbx_InfoAlign.addItems(['left', 'center', 'right'])
-            self.LabelCraftUI.cbx_InfoAlign.setCurrentText(self.align_state)
+            self.LabelCraftUI.cbx_InfoAlign.setCurrentText(self.html_tags['align'])
             self.LabelCraftUI.cbx_InfoIcon.addItems(sorted(ICON_SELECTION))
-            self.LabelCraftUI.cbx_InfoIcon.setCurrentText(self.icon)
+            self.LabelCraftUI.cbx_InfoIcon.setCurrentText(self.html_tags['icon'])
 
             self.LabelCraftUI.cbx_InfoAlign.currentTextChanged.connect(self.update_label)
             self.LabelCraftUI.cbx_InfoIcon.currentTextChanged.connect(self.update_label)
@@ -681,9 +683,9 @@ class LabelCraft:
             self.LabelCraftUI.ckx_InfoItalic.setChecked(True)
 
         # Signals
-        self.LabelCraftUI.spn_DotFontSize.valueChanged.connect(self.change_dot)
-        self.LabelCraftUI.ckx_InfoBold.stateChanged.connect(self.change_bold)
-        self.LabelCraftUI.ckx_InfoItalic.stateChanged.connect(self.change_italic)
+        # self.LabelCraftUI.spn_DotFontSize.valueChanged.connect(self.change_dot)
+        # self.LabelCraftUI.ckx_InfoBold.stateChanged.connect(self.change_bold)
+        # self.LabelCraftUI.ckx_InfoItalic.stateChanged.connect(self.change_italic)
 
     def change_font_family(self):
         new_font = str(self.LabelCraftUI.fnt_FontFace.currentFont().family())
@@ -737,9 +739,9 @@ class LabelCraft:
             self.current_node_class = self.node.Class().lower()
             self.info_class()
 
-        elif self.node.Class() in ('Dissolve', 'Switch'):
-            self.current_node_class = 'switch'
-            self.switch_class()
+        # elif self.node.Class() in ('Dissolve', 'Switch'):
+        #     self.current_node_class = 'switch'
+        #     self.switch_class()
 
         elif self.node.Class() in ('Log2Lin', 'OCIOLogConvert'):
             self.current_node_class = 'log2lin'
@@ -757,8 +759,11 @@ class LabelCraft:
 
         # resize and show Widget Window
         self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Popup)
-        self.LabelCraftUI.move(QtGui.QCursor.pos() + QtCore.QPoint())
-        # self.LabelCraftUI.move(1600, 900)
+        x = QtGui.QCursor.pos().x() - (self.LabelCraftUI.width() / 2)
+        y = QtGui.QCursor.pos().y()
+
+        self.LabelCraftUI.move(x, y)
+
         self.LabelCraftUI.edt_NodeLabel.setFocusPolicy(Qt.StrongFocus)
         self.LabelCraftUI.edt_NodeLabel.setFocus()
         self.LabelCraftUI.adjustSize()

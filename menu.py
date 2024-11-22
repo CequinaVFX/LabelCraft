@@ -1,6 +1,8 @@
 import main
 import nuke
 
+print('Label Craft Original ', main.__version__)
+
 SHORTCUT = 'shift+q'
 ICON = 'LabelCraft.png'
 
