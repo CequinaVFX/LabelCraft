@@ -1,11 +1,14 @@
-import main
+import LabelCraft
 import nuke
-
-print('Label Craft Original ', main.__version__)
 
 SHORTCUT = 'shift+q'
 ICON = 'LabelCraft.png'
+dagContext = 2
 
 toolbar = nuke.toolbar("Nodes")
 mainMenu = toolbar.addMenu("CQN Tools")
-mainMenu.addCommand('LabelCraft', 'main.edit_label()', SHORTCUT, icon=ICON, shortcutContext=dagContext)
+mainMenu.addCommand('LabelCraft',
+                    'LabelCraft.edit_label()',
+                    SHORTCUT,
+                    icon=ICON,
+                    shortcutContext=dagContext)

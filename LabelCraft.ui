@@ -24,9 +24,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(45, 45, 45);
-color: rgb(213, 213, 213);
-font: 10pt &quot;MS Shell Dlg 2&quot;;
-disabled-color: rgb(50, 50, 50);</string>
+color: rgb(213, 213, 213);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
@@ -39,16 +37,6 @@ disabled-color: rgb(50, 50, 50);</string>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <layout class="QHBoxLayout" name="label_horizontal_layout">
-          <item>
-           <widget class="QLabel" name="lbl_NodeLabel">
-            <property name="text">
-             <string>label</string>
-            </property>
-            <property name="buddy">
-             <cstring>edt_NodeLabel</cstring>
-            </property>
-           </widget>
-          </item>
           <item>
            <widget class="QTextEdit" name="edt_NodeLabel">
             <property name="cursor" stdset="0">
@@ -73,6 +61,9 @@ Some html is accepted.</string>
           <property name="rightMargin">
            <number>50</number>
           </property>
+          <property name="bottomMargin">
+           <number>10</number>
+          </property>
           <item>
            <layout class="QHBoxLayout" name="checkable_knobs_layout">
             <item>
@@ -89,7 +80,8 @@ Dont't draw the arrows going into this node when it is not selected.</string>
             <item>
              <widget class="QCheckBox" name="ckx_PostageStamp">
               <property name="toolTip">
-               <string>use alt + p as shortcut</string>
+               <string>use alt + p as shortcut
+ Shows a thumbnail render of the output at the current frame or a frame of your choice</string>
               </property>
               <property name="text">
                <string>&amp;postage stamp</string>
@@ -110,11 +102,22 @@ Show this node in the Bookmark list.</string>
            </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_NodeColor">
-            <property name="text">
-             <string>&amp;node color</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QPushButton" name="btn_NodeColor">
+              <property name="text">
+               <string>set node color</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btn_random_color">
+              <property name="text">
+               <string>random color</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </item>
@@ -123,16 +126,16 @@ Show this node in the Bookmark list.</string>
           <property name="title">
            <string>read</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_7" columnstretch="0,1,0">
+          <layout class="QGridLayout" name="gridLayout_7" columnstretch="0,0,0">
+           <item row="0" column="1" colspan="2">
+            <widget class="QComboBox" name="cbx_Colorspace"/>
+           </item>
            <item row="1" column="0">
             <widget class="QLabel" name="lbl_ReadChannels">
              <property name="text">
               <string>channels</string>
              </property>
             </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QComboBox" name="cbx_Channels"/>
            </item>
            <item row="1" column="2">
             <widget class="QPushButton" name="btn_Shuffle">
@@ -141,6 +144,9 @@ Show this node in the Bookmark list.</string>
              </property>
             </widget>
            </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="cbx_Channels"/>
+           </item>
            <item row="0" column="0">
             <widget class="QLabel" name="lbl_ReadColorspace">
              <property name="text">
@@ -148,8 +154,40 @@ Show this node in the Bookmark list.</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="1" colspan="2">
-            <widget class="QComboBox" name="cbx_Colorspace"/>
+           <item row="2" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <property name="topMargin">
+              <number>5</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_shuffle_red">
+               <property name="text">
+                <string>red</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_shuffle_green">
+               <property name="text">
+                <string>green</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_shuffle_blue">
+               <property name="text">
+                <string>blue</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_shuffle_alpha">
+               <property name="text">
+                <string>alpha</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -214,7 +252,7 @@ Show this node in the Bookmark list.</string>
           <property name="title">
            <string>tracker</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout" columnstretch="1,3,0">
+          <layout class="QGridLayout" name="gridLayout" columnstretch="0,2,2">
            <item row="0" column="0">
             <widget class="QLabel" name="lbl_TrackerTransform">
              <property name="text">
@@ -249,7 +287,7 @@ Show this node in the Bookmark list.</string>
 use alt + g as shortcut</string>
              </property>
              <property name="text">
-              <string>&amp;get current</string>
+              <string>&amp;set to current</string>
              </property>
             </widget>
            </item>
@@ -681,7 +719,7 @@ set in colorspace for OCIOColorspace and Colorspace</string>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="footer_horizontal_layout" stretch="0,0">
+      <layout class="QHBoxLayout" name="footer_horizontal_layout" stretch="1,2">
        <item>
         <widget class="QPushButton" name="btn_Discard">
          <property name="text">
@@ -692,7 +730,33 @@ set in colorspace for OCIOColorspace and Colorspace</string>
        <item>
         <widget class="QPushButton" name="btn_OK">
          <property name="text">
-          <string>&amp;OK</string>
+          <string>confirm</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horlay_credits">
+       <property name="topMargin">
+        <number>10</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="lbl_credits">
+         <property name="font">
+          <font>
+           <family>MS Shell Dlg 2</family>
+           <pointsize>6</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>credits</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
