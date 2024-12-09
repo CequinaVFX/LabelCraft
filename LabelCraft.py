@@ -3,7 +3,7 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.7'
+__version__ = '1.0.8'
 __release_date__ = 'December, 22 2024'
 __license__ = 'MIT'
 
@@ -132,7 +132,7 @@ def get_layers(node):
     return sorted(node_layers)
 
 
-def generate_color():
+def generate_random_color():
     COLOR_RANGE = (0.1, 0.8)
     red = random.uniform(COLOR_RANGE[0], COLOR_RANGE[1])
     green = random.uniform(COLOR_RANGE[0], COLOR_RANGE[1])
@@ -236,7 +236,11 @@ class LabelCraft:
                 action.triggered.connect(lambda checked=False, p=preset: self.insert_preset_text(p))
 
             # Show the context menu at the cursor position
-            context_menu.exec_(self.LabelCraftUI.edt_NodeLabel.mapToGlobal(position))
+            p = QtCore.QPoint()
+            p.setX(QtGui.QCursor.pos().x())
+            p.setY(QtGui.QCursor.pos().y())
+            context_menu.exec_(p)
+
 
     def insert_preset_text(self, preset_text):
         cursor = self.LabelCraftUI.edt_NodeLabel.textCursor()
@@ -282,7 +286,7 @@ class LabelCraft:
 
     def update_node_color(self, method):
         old_color = self.node['tile_color'].value()
-        new_color = generate_color()
+        new_color = generate_random_color()
         if method == 'get':
             new_color = nuke.getColor(old_color)
 
