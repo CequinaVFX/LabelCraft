@@ -19,13 +19,7 @@ label_presets = {"tracker": ["[value transform] : [value reference_frame]",
                                "[value scale]", "[value filter]"]}
 
 
-"""
-I've made a selection of icons I assume useful.
-You may add or remove icons considering you needs.
-## Linux > /usr/local/NukeXX.XvX/plugins/icons
-## Windows > C:\Program Files\NukeXX.XvX\plugins\icons
-## MacOS > 
-"""
+
 icon_selection = ['none', '2D', '3D', 'Axis', 'Add', 'Anaglyph', 'Assert',
                   'Bezier', 'Camera',
                   'Card', 'ChannelMerge', 'Color', 'ColorAdd', 'ColorBars', 'ColorCorrect', 'ColorLookup',

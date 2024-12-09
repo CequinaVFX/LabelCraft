@@ -3,7 +3,7 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.8'
+__version__ = '1.0.9'
 __release_date__ = 'December, 22 2024'
 __license__ = 'MIT'
 
@@ -16,11 +16,11 @@ from PySide2 import QtUiTools, QtCore, QtGui
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QFontComboBox, QStyleFactory, QMenu
 
-from LabelCraft_variable import (label_presets,
-                                 icon_selection,
-                                 dissolve_expressions,
-                                 which_expressions,
-                                 switch_expressions)
+from LabelCraft_global_variables import (label_presets,
+                                         icon_selection,
+                                         dissolve_expressions,
+                                         which_expressions,
+                                         switch_expressions)
 
 DISSOLVE_EXPRESSIONS = {'liner': 'clamp( ( frame - value_A ) / ( value_B - value_A))',
                         'easy in-out': '(sin(clamp( ( ( frame - value_A ) * pi ) / ( value_B - value_A ) - pi / 2 , - pi / 2, pi / 2 ) ) + 1) / 2',
