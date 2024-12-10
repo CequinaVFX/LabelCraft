@@ -127,20 +127,10 @@ Show this node in the Bookmark list.</string>
            <string>read</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_7" columnstretch="0,0,0">
-           <item row="0" column="1" colspan="2">
-            <widget class="QComboBox" name="cbx_Colorspace"/>
-           </item>
            <item row="1" column="0">
             <widget class="QLabel" name="lbl_ReadChannels">
              <property name="text">
               <string>channels</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <widget class="QPushButton" name="btn_Shuffle">
-             <property name="text">
-              <string>shuffle it!</string>
              </property>
             </widget>
            </item>
@@ -153,6 +143,34 @@ Show this node in the Bookmark list.</string>
               <string>colorspace</string>
              </property>
             </widget>
+           </item>
+           <item row="0" column="1" colspan="2">
+            <widget class="QComboBox" name="cbx_Colorspace"/>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="btn_Shuffle">
+             <property name="text">
+              <string>shuffle it!</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="horizontalLayout_3">
+             <item>
+              <widget class="QPushButton" name="btn_shuffle_white">
+               <property name="text">
+                <string>alpha full white</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_shuffle_black">
+               <property name="text">
+                <string>alpha full black</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item row="2" column="0" colspan="3">
             <layout class="QHBoxLayout" name="horizontalLayout">

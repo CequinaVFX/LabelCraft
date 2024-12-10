@@ -3,8 +3,8 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.9'
-__release_date__ = 'December, 22 2024'
+__version__ = '1.0.10'
+__release_date__ = 'December, 10 2024'
 __license__ = 'MIT'
 
 import re
@@ -16,28 +16,13 @@ from PySide2 import QtUiTools, QtCore, QtGui
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QFontComboBox, QStyleFactory, QMenu
 
-from LabelCraft_global_variables import (label_presets,
-                                         icon_selection,
-                                         dissolve_expressions,
-                                         which_expressions,
-                                         switch_expressions)
-
-DISSOLVE_EXPRESSIONS = {'liner': 'clamp( ( frame - value_A ) / ( value_B - value_A))',
-                        'easy in-out': '(sin(clamp( ( ( frame - value_A ) * pi ) / ( value_B - value_A ) - pi / 2 , - pi / 2, pi / 2 ) ) + 1) / 2',
-                        'easy in': 'sin(clamp( ( ( frame - value_A ) * pi ) / ( ( value_B - value_A ) * 2 ) - pi / 2, -pi / 2,0 ) ) + 1',
-                        'easy out': 'sin(clamp( ( ( frame - ( value_A * 2 - value_B ) ) * pi ) / ( ( value_B - value_A ) * 2 ) - pi / 2,0, pi / 2) )'}
-
-WHICH_EXPRESSIONS = ['$gui', '!$gui', 'value error', 'frame ==', 'frame >', 'frame >=', 'frame <', 'frame <=',
-                     'inrange frame']
-
-SWITCH_EXPRESSIONS = {'input 1 on GUI': '$gui',
-                      'input 0 on GUI': '!$gui',
-                      'input 1 at frame': 'frame == value_A',
-                      'input 1 after frame': 'frame > value_A',
-                      'input 1 before frame': 'frame < value_A',
-                      'input 1 inbetween range': 'inrange(frame, value_A, value_B)'}
+from LabelCraft_customizables import (label_presets,
+                                      icon_selection,
+                                      dissolve_expressions,
+                                      switch_expressions)
 
 
+# Global Functions
 def get_selection():
     """
     Retrieve the selected node in Nuke.
@@ -221,9 +206,9 @@ class LabelCraft:
         self.LabelCraftUI.btn_random_color.clicked.connect(lambda: self.update_node_color('random'))
 
         self.LabelCraftUI.edt_NodeLabel.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.LabelCraftUI.edt_NodeLabel.customContextMenuRequested.connect(self.show_context_menu)
+        self.LabelCraftUI.edt_NodeLabel.customContextMenuRequested.connect(self.show_label_context_menu)
 
-    def show_context_menu(self, position):
+    def show_label_context_menu(self):
         self.presets = []
         if self.current_node_class in label_presets.keys():
             self.presets = label_presets[self.current_node_class]
@@ -240,7 +225,6 @@ class LabelCraft:
             p.setX(QtGui.QCursor.pos().x())
             p.setY(QtGui.QCursor.pos().y())
             context_menu.exec_(p)
-
 
     def insert_preset_text(self, preset_text):
         cursor = self.LabelCraftUI.edt_NodeLabel.textCursor()
@@ -353,13 +337,10 @@ class LabelCraft:
         self.LabelCraftUI.btn_shuffle_green.clicked.connect(lambda: self.pressed_shuffle('green'))
         self.LabelCraftUI.btn_shuffle_blue.clicked.connect(lambda: self.pressed_shuffle('blue'))
         self.LabelCraftUI.btn_shuffle_alpha.clicked.connect(lambda: self.pressed_shuffle('alpha'))
+        self.LabelCraftUI.btn_shuffle_white.clicked.connect(lambda: self.pressed_shuffle('white'))
+        self.LabelCraftUI.btn_shuffle_black.clicked.connect(lambda: self.pressed_shuffle('black'))
 
     def shuffle_class(self):
-        self.LabelCraftUI.btn_shuffle_red.setVisible(False)
-        self.LabelCraftUI.btn_shuffle_green.setVisible(False)
-        self.LabelCraftUI.btn_shuffle_blue.setVisible(False)
-        self.LabelCraftUI.btn_shuffle_alpha.setVisible(False)
-
         self.LabelCraftUI.grp_Read.setVisible(True)
         self.LabelCraftUI.lbl_ReadColorspace.setVisible(False)
         self.LabelCraftUI.cbx_Colorspace.setVisible(False)
@@ -373,6 +354,13 @@ class LabelCraft:
         self.LabelCraftUI.btn_Shuffle.clicked.connect(self.shuffle_layer)
 
         self.LabelCraftUI.cbx_Colorspace.currentTextChanged.connect(self.change_shuffle_channel)
+
+        self.LabelCraftUI.btn_shuffle_red.clicked.connect(lambda: self.pressed_shuffle('red'))
+        self.LabelCraftUI.btn_shuffle_green.clicked.connect(lambda: self.pressed_shuffle('green'))
+        self.LabelCraftUI.btn_shuffle_blue.clicked.connect(lambda: self.pressed_shuffle('blue'))
+        self.LabelCraftUI.btn_shuffle_alpha.clicked.connect(lambda: self.pressed_shuffle('alpha'))
+        self.LabelCraftUI.btn_shuffle_white.clicked.connect(lambda: self.pressed_shuffle('white'))
+        self.LabelCraftUI.btn_shuffle_black.clicked.connect(lambda: self.pressed_shuffle('black'))
 
     def change_read_colorspace(self):
         self.node['colorspace'].setValue(str(self.LabelCraftUI.cbx_Colorspace.currentText()))
@@ -400,17 +388,28 @@ class LabelCraft:
         self.LabelCraftUI.close()
 
     def pressed_shuffle(self, selected_shuffle):
-        shuffle_node = nuke.createNode('Shuffle')  #(inputs=[self.node])
+        if selected_shuffle == 'alpha full white':
+            selected_shuffle = 'white'
+        elif selected_shuffle == 'alpha full black':
+            selected_shuffle = 'black'
+
+        if self.current_node_class == 'read':
+            shuffle_node = nuke.createNode('Shuffle')
+        elif self.current_node_class == 'shuffle':
+            shuffle_node = self.node
+
         shuffle_node.setName("Shuffle_{}".format(selected_shuffle.upper()), uncollide=True)
         shuffle_node['red'].setValue(selected_shuffle)
         shuffle_node['green'].setValue(selected_shuffle)
         shuffle_node['blue'].setValue(selected_shuffle)
         shuffle_node['alpha'].setValue(selected_shuffle)
 
-        node_color = {'red' : 4278190335,
-                      'green' : 16711935,
-                      'blue' : 65535,
-                      'alpha' : 4294967295}
+        node_color = {'red': 4278190335,
+                      'green': 16711935,
+                      'blue': 65535,
+                      'alpha': 1296911871,
+                      'white': 4294967295,
+                      'black': 255}
 
         shuffle_node['tile_color'].setValue(node_color[selected_shuffle])
 
@@ -595,9 +594,9 @@ class LabelCraft:
         self.LabelCraftUI.spn_SwitchValueB.setRange(1, 1000000)
         self.LabelCraftUI.spn_SwitchValueB.setValue(standard_value_b)
 
-        _expressions = list(SWITCH_EXPRESSIONS.keys())
+        _expressions = list(switch_expressions.keys())
         if self.current_node_class == 'dissolve':
-            _expressions = list(DISSOLVE_EXPRESSIONS.keys())
+            _expressions = list(dissolve_expressions.keys())
 
         self.LabelCraftUI.cbx_SwitchExpression.addItems(_expressions)
 
@@ -843,10 +842,6 @@ class LabelCraft:
             self.current_node_class = self.node.Class().lower()
             self.info_class()
 
-        # elif self.node.Class() in ('Dissolve', 'Switch'):
-        #     self.current_node_class = self.node.Class().lower()
-        #     self.switch_class()
-
         elif self.node.Class() in ('Log2Lin', 'OCIOLogConvert'):
             self.current_node_class = 'log2lin'
             self.log2lin_class()
@@ -855,18 +850,22 @@ class LabelCraft:
             self.current_node_class = 'colorspace'
             self.colorspace_class()
 
+        # elif self.node.Class() in ('Dissolve', 'Switch'):
+        #     self.current_node_class = self.node.Class().lower()
+        #     self.switch_class()
+
         # else:
         #     for knob in self.node.knobs():
         #         if knob in ('size', 'defocus'):
         #             self.current_node_class = knob
         #             self.filter_class()
 
-        # resize and show Widget Window
+        # reposition, resize and show Widget Window
         self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Popup)
-        x = QtGui.QCursor.pos().x() - (self.LabelCraftUI.width() / 2)
-        y = QtGui.QCursor.pos().y()
 
-        self.LabelCraftUI.move(x, y)
+        # Re-position under mouse cursor
+        self.LabelCraftUI.move(QtGui.QCursor.pos().x() - (self.LabelCraftUI.width() / 2),
+                               QtGui.QCursor.pos().y())
 
         self.LabelCraftUI.edt_NodeLabel.setFocusPolicy(Qt.StrongFocus)
         self.LabelCraftUI.edt_NodeLabel.setFocus()
