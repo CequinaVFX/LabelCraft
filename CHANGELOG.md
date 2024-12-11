@@ -3,6 +3,9 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.13] - 2024-12-11
++ fix Shuffle and Shuffle2 condition 
+
 ## [1.0.12] - 2024-12-11
 + add Shuffle and Shuffle2 condition 
 
