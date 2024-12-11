@@ -3,7 +3,7 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.11'
+__version__ = '1.0.12'
 __release_date__ = 'December, 11 2024'
 __license__ = 'MIT'
 
@@ -394,7 +394,11 @@ class LabelCraft:
             selected_shuffle = 'black'
 
         if self.current_node_class == 'read':
-            shuffle_node = nuke.createNode('Shuffle')
+            if nuke.NUKE_VERSION_MAJOR < 12:
+                shuffle_node = nuke.createNode('Shuffle2')
+            else:
+                shuffle_node = nuke.createNode('Shuffle')
+
         elif self.current_node_class in ('shuffle', 'shuffle2'):
             shuffle_node = self.node
 
