@@ -3,8 +3,8 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.10'
-__release_date__ = 'December, 10 2024'
+__version__ = '1.0.11'
+__release_date__ = 'December, 11 2024'
 __license__ = 'MIT'
 
 import re
@@ -395,14 +395,43 @@ class LabelCraft:
 
         if self.current_node_class == 'read':
             shuffle_node = nuke.createNode('Shuffle')
-        elif self.current_node_class == 'shuffle':
+        elif self.current_node_class in ('shuffle', 'shuffle2'):
             shuffle_node = self.node
 
-        shuffle_node.setName("Shuffle_{}".format(selected_shuffle.upper()), uncollide=True)
-        shuffle_node['red'].setValue(selected_shuffle)
-        shuffle_node['green'].setValue(selected_shuffle)
-        shuffle_node['blue'].setValue(selected_shuffle)
-        shuffle_node['alpha'].setValue(selected_shuffle)
+        if self.current_node_class == 'shuffle':
+            shuffle_node.setName("Shuffle_{}".format(selected_shuffle.upper()), uncollide=True)
+            shuffle_node['red'].setValue(selected_shuffle)
+            shuffle_node['green'].setValue(selected_shuffle)
+            shuffle_node['blue'].setValue(selected_shuffle)
+            shuffle_node['alpha'].setValue(selected_shuffle)
+
+        if self.current_node_class == 'shuffle2':
+            # if selected_shuffle not in ('white', 'black'):
+            mapped = [
+                ("rgba.{}".format(selected_shuffle), "rgba.red"),
+                ("rgba.{}".format(selected_shuffle), "rgba.green"),
+                ("rgba.{}".format(selected_shuffle), "rgba.blue"),
+                ("rgba.{}".format(selected_shuffle), "rgba.alpha"),
+            ]
+            if selected_shuffle == 'black':
+                mapped = [
+                    ("black", "rgba.red"),
+                    ("black", "rgba.green"),
+                    ("black", "rgba.blue"),
+                    ("black", "rgba.alpha"),
+                ]
+            elif selected_shuffle == 'white':
+                mapped = [
+                    ("white", "rgba.red"),
+                    ("white", "rgba.green"),
+                    ("white", "rgba.blue"),
+                    ("white", "rgba.alpha"),
+                ]
+
+
+            shuffle_node["mappings"].setValue(mapped)
+
+
 
         node_color = {'red': 4278190335,
                       'green': 16711935,
