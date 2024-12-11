@@ -3,7 +3,7 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.13'
+__version__ = '1.0.14'
 __release_date__ = 'December, 11 2024'
 __license__ = 'MIT'
 
@@ -410,21 +410,25 @@ class LabelCraft:
             shuffle_node['alpha'].setValue(selected_shuffle)
 
         if self.current_node_class == 'shuffle2':
-            # if selected_shuffle not in ('white', 'black'):
+            shuffle_node.setName("Shuffle_{}".format(selected_shuffle.upper()), uncollide=True)
             mapped = [
                 ("rgba.{}".format(selected_shuffle), "rgba.red"),
                 ("rgba.{}".format(selected_shuffle), "rgba.green"),
                 ("rgba.{}".format(selected_shuffle), "rgba.blue"),
                 ("rgba.{}".format(selected_shuffle), "rgba.alpha"),
             ]
+
             if selected_shuffle == 'black':
+                print('full black')
                 mapped = [
                     ("black", "rgba.red"),
                     ("black", "rgba.green"),
                     ("black", "rgba.blue"),
                     ("black", "rgba.alpha"),
                 ]
+
             elif selected_shuffle == 'white':
+                print('full white')
                 mapped = [
                     ("white", "rgba.red"),
                     ("white", "rgba.green"),
@@ -432,10 +436,7 @@ class LabelCraft:
                     ("white", "rgba.alpha"),
                 ]
 
-
             shuffle_node["mappings"].setValue(mapped)
-
-
 
         node_color = {'red': 4278190335,
                       'green': 16711935,
