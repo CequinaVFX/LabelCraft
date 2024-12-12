@@ -36,7 +36,7 @@ color: rgb(213, 213, 213);</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
-         <layout class="QHBoxLayout" name="label_horizontal_layout">
+         <layout class="QHBoxLayout" name="horlay_label">
           <item>
            <widget class="QTextEdit" name="edt_NodeLabel">
             <property name="cursor" stdset="0">
@@ -54,7 +54,7 @@ Some html is accepted.</string>
          </layout>
         </item>
         <item>
-         <layout class="QVBoxLayout" name="common_knobs_vertical_layout">
+         <layout class="QVBoxLayout" name="vertlay_common_knobs">
           <property name="leftMargin">
            <number>50</number>
           </property>
@@ -65,7 +65,7 @@ Some html is accepted.</string>
            <number>10</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="checkable_knobs_layout">
+           <layout class="QHBoxLayout" name="horlay_checkable_knobs">
             <item>
              <widget class="QCheckBox" name="ckx_HideInput">
               <property name="toolTip">
@@ -102,18 +102,18 @@ Show this node in the Bookmark list.</string>
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <layout class="QHBoxLayout" name="horlay_color_nodes">
             <item>
              <widget class="QPushButton" name="btn_NodeColor">
               <property name="text">
-               <string>set node color</string>
+               <string>set node &amp;color</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="btn_random_color">
               <property name="text">
-               <string>random color</string>
+               <string>set &amp;random color</string>
               </property>
              </widget>
             </item>
@@ -155,7 +155,7 @@ Show this node in the Bookmark list.</string>
             </widget>
            </item>
            <item row="3" column="0" colspan="3">
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <layout class="QHBoxLayout" name="horlay_shuffle_bw">
              <item>
               <widget class="QPushButton" name="btn_shuffle_white">
                <property name="text">
@@ -173,7 +173,7 @@ Show this node in the Bookmark list.</string>
             </layout>
            </item>
            <item row="2" column="0" colspan="3">
-            <layout class="QHBoxLayout" name="horizontalLayout">
+            <layout class="QHBoxLayout" name="horlay_shuffle_channels">
              <property name="topMargin">
               <number>5</number>
              </property>
@@ -601,6 +601,29 @@ use alt + g as shortcut</string>
            <string>switch</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_6">
+           <item row="0" column="0">
+            <widget class="QLabel" name="lbl_SwitchWhich">
+             <property name="text">
+              <string>which</string>
+             </property>
+             <property name="buddy">
+              <cstring>edt_SwitchWhich</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLabel" name="lbl_ValueA">
+             <property name="text">
+              <string>value A</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+             <property name="buddy">
+              <cstring>spn_SwitchValueA</cstring>
+             </property>
+            </widget>
+           </item>
            <item row="2" column="4">
             <widget class="QSpinBox" name="spn_SwitchValueB">
              <property name="toolTip">
@@ -628,50 +651,36 @@ use alt + g as shortcut</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="lbl_SwitchWhich">
-             <property name="text">
-              <string>which</string>
-             </property>
-             <property name="buddy">
-              <cstring>edt_SwitchWhich</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QCheckBox" name="ckx_SwitchExpression">
-             <property name="toolTip">
-              <string>set an expression for Switch and Dissolve</string>
-             </property>
-             <property name="text">
-              <string>use &amp;expression</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLabel" name="lbl_ValueA">
-             <property name="text">
-              <string>value A</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-             <property name="buddy">
-              <cstring>spn_SwitchValueA</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1" colspan="4">
-            <widget class="QComboBox" name="cbx_SwitchExpression">
-             <property name="toolTip">
-              <string>choose an expression to Switch and Dissolve</string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="1" colspan="4">
             <widget class="QLineEdit" name="edt_SwitchWhich">
              <property name="toolTip">
               <string>set input value for Switch and Dissolve</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="2">
+            <widget class="QSpinBox" name="spn_SwitchValueC"/>
+           </item>
+           <item row="3" column="4">
+            <widget class="QSpinBox" name="spn_SwitchValueD"/>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLabel" name="lbl_ValueC">
+             <property name="text">
+              <string>value C</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="3">
+            <widget class="QLabel" name="lbl_ValueD">
+             <property name="text">
+              <string>value D</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -737,7 +746,7 @@ set in colorspace for OCIOColorspace and Colorspace</string>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="footer_horizontal_layout" stretch="1,2">
+      <layout class="QHBoxLayout" name="horlay_footer" stretch="1,2">
        <item>
         <widget class="QPushButton" name="btn_Discard">
          <property name="text">

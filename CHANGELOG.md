@@ -3,6 +3,9 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.15] - 2024-12-11
++ add Switch and Dissolve class
+
 ## [1.0.14] - 2024-12-11
 + fix Shuffle and Shuffle2 condition 
 
