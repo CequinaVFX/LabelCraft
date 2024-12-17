@@ -3,7 +3,7 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.15'
+__version__ = '1.0.16'
 __release_date__ = 'December, 12 2024'
 __license__ = 'MIT'
 
@@ -132,6 +132,7 @@ class LabelCraft:
         """
             Start UI
         """
+
         package_path = os.path.dirname(__file__)
         ui_path = os.path.join(package_path, '{}.ui'.format(__title__))
 
@@ -149,8 +150,9 @@ class LabelCraft:
         data = get_json_data(json_file=_json)
 
         self.label_presets = data['label_presets']
-        self.icon_selection = data['icon_selection']
+        self.disable_expressions = data['disable_expressions']
         self.which_expressions = data['which_expressions']
+        self.icon_selection = data['icon_selection']
 
         # style_sheet_path = '/'.join([package_path, 'LabelCraft_stylesheet.qss'])
         # self.LabelCraftUI.setStyleSheet(style_sheet_path)
@@ -163,7 +165,9 @@ class LabelCraft:
                           'italic': True,
                           'icon': 'none'}
         self.current_node_class = 'none'
-        self.presets = None
+        self.presets_label_knob = None
+        self.presets_which_knob = None
+        self.presets_disable_knob = None
 
         self._initialize_ui()
 
@@ -173,13 +177,16 @@ class LabelCraft:
         """
 
         _credits = ('<font size=2 color=slategrey>'
-                    '<a href="{}" style="color:salmon">Label Craft</a> v{}'
+                    '<a href="{}" style="color:salmon">Label Craft</a> v {}'
                     ' - created by <a href="{}" style="color:salmon">{}</a>').format(__website_blog__,
                                                                                      __version__,
                                                                                      __website__,
                                                                                      __author__)
 
         self.LabelCraftUI.lbl_credits.setText(_credits)
+        self.LabelCraftUI.lbl_credits.setOpenExternalLinks(True)
+        self.LabelCraftUI.lbl_credits.setTextInteractionFlags(self.LabelCraftUI.lbl_credits.textInteractionFlags() |
+                                                              self.LabelCraftUI.lbl_credits.openExternalLinks())
 
         # Loop through all groups to make them invisible
         class_groups = [
@@ -188,9 +195,6 @@ class LabelCraft:
             ]
         for _class in class_groups:
             getattr(self.LabelCraftUI, _class).setVisible(False)
-
-        self.LabelCraftUI.btn_OK.setVisible(False)
-        self.LabelCraftUI.btn_Discard.setVisible(False)
 
     # Label Knob
     def label_knob(self, node):
@@ -221,14 +225,14 @@ class LabelCraft:
         self.LabelCraftUI.edt_NodeLabel.customContextMenuRequested.connect(self.show_label_context_menu)
 
     def show_label_context_menu(self):
-        self.presets = []
+        self.presets_label_knob = []
         if self.current_node_class in self.label_presets.keys():
-            self.presets = self.label_presets[self.current_node_class]
+            self.presets_label_knob = self.label_presets[self.current_node_class]
 
             context_menu = QMenu(self.LabelCraftUI.edt_NodeLabel)
 
             # Add preset actions
-            for preset in self.presets:
+            for preset in self.presets_label_knob:
                 action = context_menu.addAction(preset)
                 action.triggered.connect(lambda checked=False, p=preset: self.insert_preset_text(p))
 
@@ -293,6 +297,7 @@ class LabelCraft:
         self.LabelCraftUI.ckx_HideInput.setVisible(False)
         self.LabelCraftUI.ckx_PostageStamp.setVisible(False)
         self.LabelCraftUI.ckx_Bookmark.setVisible(False)
+        self.LabelCraftUI.ckx_Disable.setVisible(False)
 
         if 'hide_input' in node.knobs():
             hide_input_state = node['hide_input'].value()
@@ -309,10 +314,19 @@ class LabelCraft:
             self.LabelCraftUI.ckx_Bookmark.setVisible(True)
             self.LabelCraftUI.ckx_Bookmark.setChecked(bookmark_state)
 
+        if 'disable' in node.knobs():
+            bookmark_state = node['disable'].value()
+            self.LabelCraftUI.ckx_Disable.setVisible(True)
+            self.LabelCraftUI.ckx_Disable.setChecked(bookmark_state)
+
         # Signals
         self.LabelCraftUI.ckx_HideInput.stateChanged.connect(self.update_hide_input_knob)
         self.LabelCraftUI.ckx_PostageStamp.stateChanged.connect(self.update_postagestamp_knob)
         self.LabelCraftUI.ckx_Bookmark.stateChanged.connect(self.update_bookmark_knob)
+        self.LabelCraftUI.ckx_Disable.stateChanged.connect(self.update_disable_knob)
+
+        self.LabelCraftUI.ckx_Disable.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.LabelCraftUI.ckx_Disable.customContextMenuRequested.connect(self.show_disable_context_menu)
 
     def update_hide_input_knob(self):
         self.node['hide_input'].setValue(self.LabelCraftUI.ckx_HideInput.checkState())
@@ -322,6 +336,33 @@ class LabelCraft:
 
     def update_bookmark_knob(self):
         self.node['bookmark'].setValue(self.LabelCraftUI.ckx_Bookmark.checkState())
+
+    def update_disable_knob(self):
+        self.node['disable'].setValue(self.LabelCraftUI.ckx_Disable.checkState())
+
+    def show_disable_context_menu(self):
+        self.presets_disable_knob = self.disable_expressions
+
+        context_menu = QMenu(self.LabelCraftUI.ckx_Disable)
+
+        # Add preset actions
+        for _expr in self.presets_disable_knob:
+            action = context_menu.addAction(_expr[2:])
+            action.triggered.connect(lambda checked=False, p=self.presets_disable_knob[_expr]:
+                                     self.insert_disable_expression(p))
+
+        # Show the context menu at the cursor position
+        p = QtCore.QPoint()
+        p.setX(QtGui.QCursor.pos().x())
+        p.setY(QtGui.QCursor.pos().y())
+        context_menu.exec_(p)
+
+    def insert_disable_expression(self, expression):
+        if expression:
+            self.node['disable'].setExpression(expression)
+        else:
+            self.node['disable'].clearAnimated()
+            self.node['disable'].setValue(False)
 
     # Read Class functions
     def read_class(self):
@@ -498,7 +539,7 @@ class LabelCraft:
 
         # only enable operation knob when exists
         if 'operation' in self.node.knobs():
-            self.current_node_class = 'merge'
+            self.current_node_class = self.node.Class().lower()
             self.LabelCraftUI.lbl_MergeOperation.setVisible(True)
             self.LabelCraftUI.cbx_MergeOperation.setVisible(True)
 
@@ -602,91 +643,56 @@ class LabelCraft:
         self.LabelCraftUI.grp_Switch.setVisible(True)
         self.LabelCraftUI.grp_Switch.setTitle('{} knobs'.format(self.node.Class()))
 
-        # expression_state = 'inrange'
-        standard_value_a = nuke.frame()
-        standard_value_b = nuke.frame() + int(nuke.root()['fps'].value())
-
-        current_which = self.node['which'].value()
         # node['which'].toScript()
         if 'which_expression' in self.node.knobs():
-            _cur_expression = self.node['which_expression'].value()
-            self.LabelCraftUI.edt_SwitchWhich.setText(_cur_expression)
+            current_expression = self.node['which_expression'].value()
+            self.LabelCraftUI.edt_SwitchWhich.setText(current_expression)
         else:
-            if self.node['which'].isAnimated():
-                print('is animated')
-            else:  # elif current_which.isdigit():
-                self.LabelCraftUI.edt_SwitchWhich.setText(str(int(current_which)))
+            current_which = int(self.node['which'].value())
+            self.LabelCraftUI.edt_SwitchWhich.setText(str(current_which))
 
-        self.LabelCraftUI.lbl_ValueA.setVisible(False)
-        self.LabelCraftUI.spn_SwitchValueA.setVisible(False)
-        self.LabelCraftUI.spn_SwitchValueA.setRange(1, 1000000)
-        self.LabelCraftUI.spn_SwitchValueA.setValue(standard_value_a)
-        if 'value_A' in self.node.knobs():
-            self.LabelCraftUI.lbl_ValueA.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueA.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueA.setValue(self.node['value_A'].value())
+        knobs = ['value_A', 'value_B', 'value_C', 'value_D']
 
-        self.LabelCraftUI.lbl_ValueB.setVisible(False)
-        self.LabelCraftUI.spn_SwitchValueB.setVisible(False)
-        self.LabelCraftUI.spn_SwitchValueB.setRange(1, 1000000)
-        self.LabelCraftUI.spn_SwitchValueB.setValue(standard_value_b)
-        if 'value_B' in self.node.knobs():
-            self.LabelCraftUI.lbl_ValueB.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueB.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueB.setValue(self.node['value_B'].value())
+        for v, knob in enumerate(knobs):
+            _label_name = 'lbl_{}'.format(knob)
+            _spin_name = 'spn_Switch_{}'.format(knob)
 
-        self.LabelCraftUI.lbl_ValueC.setVisible(False)
-        self.LabelCraftUI.spn_SwitchValueC.setVisible(False)
-        self.LabelCraftUI.spn_SwitchValueC.setRange(1, 1000000)
-        self.LabelCraftUI.spn_SwitchValueC.setValue(standard_value_b)
-        if 'value_C' in self.node.knobs():
-            self.LabelCraftUI.lbl_ValueC.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueC.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueC.setValue(self.node['value_C'].value())
+            standard_value = nuke.frame() if v == 0 else nuke.frame() + int(((nuke.root()['fps'].value() * v) / 2))
 
-        self.LabelCraftUI.lbl_ValueD.setVisible(False)
-        self.LabelCraftUI.spn_SwitchValueD.setVisible(False)
-        self.LabelCraftUI.spn_SwitchValueD.setRange(1, 1000000)
-        self.LabelCraftUI.spn_SwitchValueD.setValue(standard_value_b)
-        if 'value_D' in self.node.knobs():
-            self.LabelCraftUI.lbl_ValueD.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueD.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueD.setValue(self.node['value_D'].value())
+            getattr(self.LabelCraftUI, _label_name).setVisible(False)
+            getattr(self.LabelCraftUI, _spin_name).setVisible(False)
+            getattr(self.LabelCraftUI, _spin_name).setRange(1, 1000000)
+            getattr(self.LabelCraftUI, _spin_name).setValue(standard_value)
+
+            getattr(self.LabelCraftUI, _spin_name).valueChanged.connect(lambda value, k=knob:
+                                                                        self.change_expression_value(k, value))
+
+            if knob in self.node.knobs():
+                getattr(self.LabelCraftUI, _label_name).setVisible(True)
+                getattr(self.LabelCraftUI, _spin_name).setVisible(True)
+                getattr(self.LabelCraftUI, _spin_name).setValue(self.node[knob].value())
 
         self.LabelCraftUI.edt_SwitchWhich.setContextMenuPolicy(Qt.CustomContextMenu)
         self.LabelCraftUI.edt_SwitchWhich.customContextMenuRequested.connect(self.show_expression_context_menu)
-
         self.LabelCraftUI.edt_SwitchWhich.textChanged.connect(self.which_change)
-        self.LabelCraftUI.spn_SwitchValueA.valueChanged.connect(lambda value, knob='value_A':
-                                                                self.change_expression_value(knob, value))
-
-        self.LabelCraftUI.spn_SwitchValueB.valueChanged.connect(lambda value, knob='value_B':
-                                                                self.change_expression_value(knob, value))
-
-        self.LabelCraftUI.spn_SwitchValueC.valueChanged.connect(lambda value, knob='value_C':
-                                                                self.change_expression_value(knob, value))
-
-        self.LabelCraftUI.spn_SwitchValueD.valueChanged.connect(lambda value, knob='value_D':
-                                                                self.change_expression_value(knob, value))
 
     def show_expression_context_menu(self):
-        self.presets = self.which_expressions[self.current_node_class]
+        self.presets_which_knob = self.which_expressions[self.current_node_class]
+
+        _switch_element = self.LabelCraftUI.edt_SwitchWhich
 
         context_menu = QMenu(self.LabelCraftUI.edt_SwitchWhich)
 
         # Add preset actions
-        for _name, _expression in sorted(self.presets.items()):
-            action = context_menu.addAction(_name)
-            action.triggered.connect(lambda checked=False, p=_expression: self.insert_preset_expression(p))
+        for _name, _expression in sorted(self.presets_which_knob.items()):
+            action = context_menu.addAction(_name[2:])
+            action.triggered.connect(lambda checked=False, p=_expression: _switch_element.setText(p))
 
         # Show the context menu at the cursor position
         p = QtCore.QPoint()
         p.setX(QtGui.QCursor.pos().x())
         p.setY(QtGui.QCursor.pos().y())
         context_menu.exec_(p)
-
-    def insert_preset_expression(self, preset_text):
-        self.LabelCraftUI.edt_SwitchWhich.setText(preset_text)
 
     def which_change(self):
         _which = self.LabelCraftUI.edt_SwitchWhich.text()
@@ -701,92 +707,51 @@ class LabelCraft:
             self.manage_knobs(expression='')
         else:
             self.node['which'].setExpression(_which)
-
-            if 'value_A' in _which:
-                self.LabelCraftUI.lbl_ValueA.setVisible(True)
-                self.LabelCraftUI.spn_SwitchValueA.setEnabled(True)
-                self.LabelCraftUI.spn_SwitchValueA.setVisible(True)
-
-            if 'inrange' in _which:
-                self.LabelCraftUI.lbl_ValueB.setVisible(True)
-                self.LabelCraftUI.spn_SwitchValueB.setEnabled(True)
-                self.LabelCraftUI.spn_SwitchValueB.setVisible(True)
-
             self.manage_knobs(expression=_which)
 
     def change_expression_value(self, knob, value):
         self.node[knob].setValue(value)
 
-    def manage_knobs(self, expression):
-        valueA = int(self.LabelCraftUI.spn_SwitchValueA.value())
-        valueB = int(self.LabelCraftUI.spn_SwitchValueB.value())
-        valueC = int(self.LabelCraftUI.spn_SwitchValueC.value())
-        valueD = int(self.LabelCraftUI.spn_SwitchValueD.value())
+    def knob_handler(self, knob_name, value, expression):
+        label_name = 'lbl_{}'.format(knob_name)
+        spin_name = 'spn_Switch_{}'.format(knob_name)
+        self.node[knob_name].setValue(value)
 
+        if knob_name in expression and knob_name not in self.node.knobs():
+            pass
+
+    def manage_knobs(self, expression):
         if 'which_expression' in self.node.knobs():
             self.node['which_expression'].setValue(expression)
-        else:
+        elif expression:
             tab = nuke.Tab_Knob('lc_tab', 'Setup expression')
             self.node.addKnob(tab)
             expr_label = nuke.Text_Knob('which_expression', ' ', expression)
             expr_label.setVisible(False)
             self.node.addKnob(expr_label)
 
-        if 'value_A' in expression and 'value_A' not in self.node.knobs():
-            knob_A = nuke.Int_Knob('value_A', 'value A')
-            self.node.addKnob(knob_A)
-            self.node['value_A'].setValue(valueA)
-        elif 'value_A' in expression:
-            self.node['value_A'].setEnabled(True)
-            self.node['value_A'].setValue(valueA)
-            self.LabelCraftUI.lbl_ValueA.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueA.setVisible(True)
-        if 'value_A' not in expression and 'value_A' in self.node.knobs():
-            self.node['value_A'].setVisible(False)
-            self.LabelCraftUI.lbl_ValueA.setVisible(False)
-            self.LabelCraftUI.spn_SwitchValueA.setVisible(False)
+        knobs = ['value_A', 'value_B', 'value_C', 'value_D']
+        for _knob in knobs:
+            _label_name = 'lbl_{}'.format(_knob)
+            _spin_name = 'spn_Switch_{}'.format(_knob)
 
-        if 'value_B' in expression and 'value_B' not in self.node.knobs():
-            knob_B = nuke.Int_Knob('value_B', 'value B')
-            self.node.addKnob(knob_B)
-            self.node['value_B'].setValue(valueB)
-        elif 'value_B' in expression:
-            self.node['value_B'].setVisible(True)
-            self.node['value_B'].setValue(valueB)
-            self.LabelCraftUI.lbl_ValueB.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueB.setVisible(True)
-        if 'value_B' not in expression and 'value_B' in self.node.knobs():
-            self.node['value_B'].setVisible(False)
-            self.LabelCraftUI.lbl_ValueB.setVisible(False)
-            self.LabelCraftUI.spn_SwitchValueB.setVisible(False)
+            spinbox = getattr(self.LabelCraftUI, _spin_name)
+            current_value = spinbox.value()
 
-        if 'value_C' in expression and 'value_C' not in self.node.knobs():
-            knob_C = nuke.Int_Knob('value_C', 'value C')
-            self.node.addKnob(knob_C)
-            self.node['value_C'].setValue(valueC)
-        elif 'value_C' in expression:
-            self.node['value_C'].setVisible(True)
-            self.node['value_C'].setValue(valueC)
-            self.LabelCraftUI.lbl_ValueC.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueC.setVisible(True)
-        if 'value_C' not in expression and 'value_C' in self.node.knobs():
-            self.node['value_C'].setVisible(False)
-            self.LabelCraftUI.lbl_ValueC.setVisible(False)
-            self.LabelCraftUI.spn_SwitchValueC.setVisible(False)
+            if _knob in expression:
+                if _knob not in self.node.knobs():
+                    knob_A = nuke.Int_Knob(_knob, _knob)
+                    self.node.addKnob(knob_A)
 
-        if 'value_D' in expression and 'value_D' not in self.node.knobs():
-            knob_D = nuke.Int_Knob('value_D', 'value D')
-            self.node.addKnob(knob_D)
-            self.node['value_D'].setValue(valueD)
-        elif 'value_D' in expression:
-            self.node['value_D'].setVisible(True)
-            self.node['value_D'].setValue(valueC)
-            self.LabelCraftUI.lbl_ValueD.setVisible(True)
-            self.LabelCraftUI.spn_SwitchValueD.setVisible(True)
-        if 'value_D' not in expression and 'value_D' in self.node.knobs():
-            self.node['value_D'].setVisible(False)
-            self.LabelCraftUI.lbl_ValueD.setVisible(False)
-            self.LabelCraftUI.spn_SwitchValueD.setVisible(False)
+                self.node[_knob].setVisible(True)
+                self.node[_knob].setValue(int(current_value))
+                getattr(self.LabelCraftUI, _label_name).setVisible(True)
+                getattr(self.LabelCraftUI, _spin_name).setVisible(True)
+
+            if _knob not in expression and _knob in self.node.knobs():
+                self.node[_knob].setVisible(False)
+                getattr(self.LabelCraftUI, _label_name).setVisible(False)
+                getattr(self.LabelCraftUI, _spin_name).setVisible(False)
 
     # Log2Lin/ OCIOLogConvert Class function
     def log2lin_class(self):
@@ -985,11 +950,11 @@ class LabelCraft:
         self.common_knobs(self.node)
 
         if self.node.Class() in ('Tracker4', 'Tracker3'):
-            self.current_node_class = 'tracker'
+            self.current_node_class = self.node.Class().lower()
             self.tracker_class()
 
         elif self.node.Class() == 'Read':
-            self.current_node_class = 'read'
+            self.current_node_class = self.node.Class().lower()
             self.read_class()
 
         elif self.node.Class() in ('Shuffle', 'Shuffle2'):
@@ -1001,7 +966,7 @@ class LabelCraft:
             self.merge_class()
 
         elif self.node.Class() in ('Roto', 'RotoPaint'):
-            self.current_node_class = 'roto'
+            self.current_node_class = self.node.Class().lower()
             self.roto_class()
 
         elif self.node.Class() in ('BackdropNode', 'StickyNote', 'Dot'):
@@ -1009,7 +974,7 @@ class LabelCraft:
             self.info_class()
 
         elif self.node.Class() in ('Log2Lin', 'OCIOLogConvert'):
-            self.current_node_class = 'log2lin'
+            self.current_node_class = self.node.Class().lower()
             self.log2lin_class()
 
         # elif self.node.Class() in ('Colorspace', 'OCIOColorSpace'):

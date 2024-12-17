@@ -1,5 +1,5 @@
 {
-    "label_presets": {"tracker": ["[value transform] : [value reference_frame]",
+    "label_presets": {"tracker4": ["[value transform] : [value reference_frame]",
                                  "[value reference_frame]",
                                  "[value transform]",
                                  "[value filter]"],
@@ -16,15 +16,14 @@
                      "dissolve": ["[value which]"],
                      "framehold": ["[value first_frame]"],
                      "log": ["[value operation]"],
-                     "merge": ["[value operation]",
+                     "merge2": ["[value operation]",
                                "[value bbox]",
                                "[value mix]",
                                "[knob tile_color [ expr { [value disable] ? 4278190335 : 0 } ] ]"],
                      "channelmerge": ["[value operation]",
                                       "[value bbox]",
                                       "[value mix]"],
-                     "keymix": ["[value operation]",
-                                "[value bbox]",
+                     "keymix": ["[value bbox]",
                                 "[value mix]"],
                      "framerange": ["[value first_frame] - [value last_frame]"],
                      "blur": ["[value size]"],
@@ -48,23 +47,26 @@
                       "Saturation", "Shuffle", "Sphere", "Sparkles", "SpotLight", "Scene", "Switch",
                       "TimeClip", "Tracker", "Viewer", "Write"
     ],
+    "disable_expressions": {
+        "a disable on GUI" : "$gui",
+        "b enable on GUI" : "!$gui",
+        "c clear expression" : null
+    },
 
     "which_expressions": {
-        "switch": {"input 0 on GUI": "!$gui",
-                   "input 1 on GUI": "$gui",
-                   "input 1 at frame": "frame == value_A",
-                   "input 1 after frame": "frame > value_A",
-                   "input 1 before frame": "frame < value_A",
-                   "input 1 inbetween range": "inrange(frame, value_A, value_B)"
+        "switch": {"a input 0 on GUI": "!$gui",
+                   "b input 1 on GUI": "$gui",
+                   "c input 1 at frame": "frame == value_A",
+                   "d input 1 after frame": "frame > value_A",
+                   "e input 1 before frame": "frame < value_A",
+                   "f input 1 inbetween range": "inrange(frame, value_A, value_B)"
         },
 
-        "dissolve": {"linear": "clamp( ( frame - value_A ) / ( value_B - value_A) )",
-                     "ease in-out": "smoothstep( value_A, value_B, frame )",
-                     "ease in": "pow( clamp( ( frame - value_A ) / ( value_B - value_A ), 0, 1) , 2 )",
-                     "ease out": "sin( clamp( ( ( frame - ( value_A * 2 - value_B ) ) * pi ) / ( ( value_B - value_A ) * 2 ) - pi / 2,0, pi / 2) )",
-                     "smooth 0-1 .. 1-0": "smoothstep(value_A, value_B, frame) * (1 - smoothstep(value_C, value_D, frame))",
-                     "linear 0-1 .. 1-0": "clamp((frame - value_A) / (value_B - value_A), 0, 1) * clamp((value_D - frame) / (value_D - value_C), 0, 1)",
-                     "random": "random((frame)/10)",
-                     "noise": "(noise( ( frame + value_D ) / value_C ) + 1 ) / 2 * ( value_B - value_A ) + value_A"
+        "dissolve": {"a linear": "clamp( ( frame - value_A ) / ( value_B - value_A) )",
+                     "b ease in-out": "smoothstep( value_A, value_B, frame )",
+                     "c ease in": "pow( clamp( ( frame - value_A ) / ( value_B - value_A ), 0, 1) , 2 )",
+                     "d ease out": "sin( clamp( ( ( frame - ( value_A * 2 - value_B ) ) * pi ) / ( ( value_B - value_A ) * 2 ) - pi / 2,0, pi / 2) )",
+                     "e smooth 0-1 .. 1-0": "smoothstep(value_A, value_B, frame) * (1 - smoothstep(value_C, value_D, frame))",
+                     "f linear 0-1 .. 1-0": "clamp((frame - value_A) / (value_B - value_A), 0, 1) * clamp((value_D - frame) / (value_D - value_C), 0, 1)"
         }
 }}

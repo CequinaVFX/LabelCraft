@@ -99,6 +99,13 @@ Show this node in the Bookmark list.</string>
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QCheckBox" name="ckx_Disable">
+              <property name="text">
+               <string>&amp;disable</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item>
@@ -612,7 +619,7 @@ use alt + g as shortcut</string>
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QLabel" name="lbl_ValueA">
+            <widget class="QLabel" name="lbl_value_A">
              <property name="text">
               <string>value A</string>
              </property>
@@ -620,19 +627,19 @@ use alt + g as shortcut</string>
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
              <property name="buddy">
-              <cstring>spn_SwitchValueA</cstring>
+              <cstring>spn_Switch_value_A</cstring>
              </property>
             </widget>
            </item>
            <item row="2" column="4">
-            <widget class="QSpinBox" name="spn_SwitchValueB">
+            <widget class="QSpinBox" name="spn_Switch_value_B">
              <property name="toolTip">
               <string>set second frame value for inrange expression</string>
              </property>
             </widget>
            </item>
            <item row="2" column="3">
-            <widget class="QLabel" name="lbl_ValueB">
+            <widget class="QLabel" name="lbl_value_B">
              <property name="text">
               <string>value B</string>
              </property>
@@ -640,12 +647,12 @@ use alt + g as shortcut</string>
               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
              <property name="buddy">
-              <cstring>spn_SwitchValueB</cstring>
+              <cstring>spn_Switch_value_B</cstring>
              </property>
             </widget>
            </item>
            <item row="2" column="2">
-            <widget class="QSpinBox" name="spn_SwitchValueA">
+            <widget class="QSpinBox" name="spn_Switch_value_A">
              <property name="toolTip">
               <string>set frame value for expressions</string>
              </property>
@@ -659,13 +666,13 @@ use alt + g as shortcut</string>
             </widget>
            </item>
            <item row="3" column="2">
-            <widget class="QSpinBox" name="spn_SwitchValueC"/>
+            <widget class="QSpinBox" name="spn_Switch_value_C"/>
            </item>
            <item row="3" column="4">
-            <widget class="QSpinBox" name="spn_SwitchValueD"/>
+            <widget class="QSpinBox" name="spn_Switch_value_D"/>
            </item>
            <item row="3" column="1">
-            <widget class="QLabel" name="lbl_ValueC">
+            <widget class="QLabel" name="lbl_value_C">
              <property name="text">
               <string>value C</string>
              </property>
@@ -675,7 +682,7 @@ use alt + g as shortcut</string>
             </widget>
            </item>
            <item row="3" column="3">
-            <widget class="QLabel" name="lbl_ValueD">
+            <widget class="QLabel" name="lbl_value_D">
              <property name="text">
               <string>value D</string>
              </property>
@@ -746,24 +753,6 @@ set in colorspace for OCIOColorspace and Colorspace</string>
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horlay_footer" stretch="1,2">
-       <item>
-        <widget class="QPushButton" name="btn_Discard">
-         <property name="text">
-          <string>&amp;discard</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_OK">
-         <property name="text">
-          <string>confirm</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
       <layout class="QHBoxLayout" name="horlay_credits">
        <property name="topMargin">
         <number>10</number>
@@ -795,8 +784,6 @@ set in colorspace for OCIOColorspace and Colorspace</string>
  </widget>
  <tabstops>
   <tabstop>edt_NodeLabel</tabstop>
-  <tabstop>btn_OK</tabstop>
-  <tabstop>btn_Discard</tabstop>
  </tabstops>
  <resources/>
  <connections/>

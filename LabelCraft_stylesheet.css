@@ -3,7 +3,7 @@
     font-family: "Courier";
     font-weight: 550;
 }
-
+//*
 QPushButton#btn_shuffle_red {
     background:  red;
     color: black
@@ -32,3 +32,4 @@ QPushButton#btn_shuffle_white {
 QPushButton#btn_shuffle_black {
     background:  black
 }
+*//
