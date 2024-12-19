@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SmartLabel_Window</class>
- <widget class="QWidget" name="SmartLabel_Window">
+ <class>SmartLabel</class>
+ <widget class="QWidget" name="SmartLabel">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,10 +17,10 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>LabelCraft</string>
+   <string>Label Craft</string>
   </property>
   <property name="windowOpacity">
-   <double>0.980000000000000</double>
+   <double>0.950000000000000</double>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(45, 45, 45);
@@ -28,9 +28,9 @@ color: rgb(213, 213, 213);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <layout class="QVBoxLayout" name="mainwindow_vertical_layout">
+    <layout class="QVBoxLayout" name="mainwindow">
      <item>
-      <widget class="QGroupBox" name="grp_NodeClass">
+      <widget class="QGroupBox" name="NodeClass_group">
        <property name="title">
         <string>node</string>
        </property>
@@ -163,6 +163,15 @@ Show this node in the Bookmark list.</string>
            </item>
            <item row="3" column="0" colspan="3">
             <layout class="QHBoxLayout" name="horlay_shuffle_bw">
+             <property name="spacing">
+              <number>10</number>
+             </property>
+             <property name="leftMargin">
+              <number>50</number>
+             </property>
+             <property name="rightMargin">
+              <number>50</number>
+             </property>
              <item>
               <widget class="QPushButton" name="btn_shuffle_white">
                <property name="text">
@@ -181,8 +190,14 @@ Show this node in the Bookmark list.</string>
            </item>
            <item row="2" column="0" colspan="3">
             <layout class="QHBoxLayout" name="horlay_shuffle_channels">
+             <property name="leftMargin">
+              <number>50</number>
+             </property>
              <property name="topMargin">
               <number>5</number>
+             </property>
+             <property name="rightMargin">
+              <number>50</number>
              </property>
              <item>
               <widget class="QPushButton" name="btn_shuffle_red">
@@ -745,6 +760,25 @@ set in colorspace for OCIOColorspace and Colorspace</string>
               <string>out</string>
              </property>
             </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grp_Scanline">
+          <property name="title">
+           <string>scanline</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="0">
+            <widget class="QLabel" name="lbl_projection_mode">
+             <property name="text">
+              <string>projection mode</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="cbx_projection_mode"/>
            </item>
           </layout>
          </widget>

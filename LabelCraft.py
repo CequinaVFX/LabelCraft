@@ -3,8 +3,8 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.16'
-__release_date__ = 'December, 12 2024'
+__version__ = '1.0.17'
+__release_date__ = 'December, 19 2024'
 __license__ = 'MIT'
 
 import re
@@ -13,7 +13,7 @@ import json
 import random
 import os.path
 
-from PySide2 import QtUiTools, QtCore, QtGui
+from PySide2 import QtUiTools, QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QFontComboBox, QStyleFactory, QMenu
 
@@ -154,9 +154,6 @@ class LabelCraft:
         self.which_expressions = data['which_expressions']
         self.icon_selection = data['icon_selection']
 
-        # style_sheet_path = '/'.join([package_path, 'LabelCraft_stylesheet.qss'])
-        # self.LabelCraftUI.setStyleSheet(style_sheet_path)
-
         # create Class attributes
         self.node = None
         self.current_label = None
@@ -189,16 +186,13 @@ class LabelCraft:
                                                               self.LabelCraftUI.lbl_credits.openExternalLinks())
 
         # Loop through all groups to make them invisible
-        class_groups = [
-            'grp_Read', 'grp_Roto', 'grp_Tracker', 'grp_Merge', 'grp_Info',
-            'grp_Filter', 'grp_Switch', 'grp_Colorspaces'
-            ]
-        for _class in class_groups:
-            getattr(self.LabelCraftUI, _class).setVisible(False)
+        for child in self.LabelCraftUI.findChildren(QtWidgets.QWidget):
+            if child.objectName().startswith('grp_'):
+                child.setVisible(False)
 
     # Label Knob
     def label_knob(self, node):
-        if self.current_node_class in ('backdropnode', 'stickynote'):
+        if self.current_node_class in ('backdropnode', 'stickynote', 'dot'):
             self.html_tags, self.current_label = split_label(node['label'].value())
         else:
             self.current_label = node['label'].value()
@@ -285,10 +279,10 @@ class LabelCraft:
             self.node['label'].setValue(new_label)
 
     def update_node_color(self, method):
-        old_color = self.node['tile_color'].value()
+        current_color = self.node['tile_color'].value()
         new_color = generate_random_color()
         if method == 'get':
-            new_color = nuke.getColor(old_color)
+            new_color = nuke.getColor(current_color)
 
         self.node['tile_color'].setValue(new_color)
 
@@ -712,14 +706,6 @@ class LabelCraft:
     def change_expression_value(self, knob, value):
         self.node[knob].setValue(value)
 
-    def knob_handler(self, knob_name, value, expression):
-        label_name = 'lbl_{}'.format(knob_name)
-        spin_name = 'spn_Switch_{}'.format(knob_name)
-        self.node[knob_name].setValue(value)
-
-        if knob_name in expression and knob_name not in self.node.knobs():
-            pass
-
     def manage_knobs(self, expression):
         if 'which_expression' in self.node.knobs():
             self.node['which_expression'].setValue(expression)
@@ -895,6 +881,16 @@ class LabelCraft:
             self.LabelCraftUI.lbl_InfoIcon.setVisible(True)
             self.LabelCraftUI.cbx_InfoIcon.setVisible(True)
 
+            if self.current_node_class == 'backdropnode':
+                self.LabelCraftUI.lbl_InfoZOrder.setVisible(True)
+                self.LabelCraftUI.spn_InfoZOrder.setVisible(True)
+                self.LabelCraftUI.spn_InfoZOrder.setRange(-99, 99)
+
+                _current_order = self.node['z_order'].value()
+                self.LabelCraftUI.spn_InfoZOrder.setValue(_current_order)
+                self.LabelCraftUI.spn_InfoZOrder.valueChanged.connect(lambda v=self.LabelCraftUI.spn_InfoZOrder.value():
+                                                                      self.change_zorder(v))
+
             self.LabelCraftUI.cbx_InfoAlign.addItems(['left', 'center', 'right'])
             self.LabelCraftUI.cbx_InfoAlign.setCurrentText(self.html_tags['align'])
             self.LabelCraftUI.cbx_InfoIcon.addItems(sorted(self.icon_selection))
@@ -909,22 +905,6 @@ class LabelCraft:
         self.LabelCraftUI.ckx_InfoItalic.stateChanged.connect(self.update_label_text)
         self.LabelCraftUI.btn_FontColor.clicked.connect(self.change_font_color)
 
-    def dot_class(self):
-        self.LabelCraftUI.grp_Dot.setVisible(True)
-        self.LabelCraftUI.grp_Dot.setTitle('Dot options')
-
-        current_font = int(self.node['note_font_size'].value())
-        self.LabelCraftUI.spn_DotFontSize.setValue(current_font)
-
-        current_note_font = self.node['note_font'].value()
-        bold = re.findall('Bold', current_note_font)
-        italic = re.findall('Italic', current_note_font)
-
-        if bold:
-            self.LabelCraftUI.ckx_InfoBold.setChecked(True)
-        if italic:
-            self.LabelCraftUI.ckx_InfoItalic.setChecked(True)
-
     def change_font_family(self):
         new_font = str(self.LabelCraftUI.fnt_FontFace.currentFont().family())
         self.node['note_font'].setValue(new_font)
@@ -938,13 +918,43 @@ class LabelCraft:
         new_color = nuke.getColor(old_color)
         self.node['note_font_color'].setValue(new_color)
 
+    def change_zorder(self, value):
+        self.node['z_order'].setValue(int(value))
+
+    # ScanlineRender Class functions
+    def scanline_class(self):
+        self.LabelCraftUI.grp_Scanline.setVisible(True)
+        self.LabelCraftUI.grp_Scanline.setTitle('{}'.format(self.node.Class()))
+
+        current_state = self.node['projection_mode'].value()
+        _options = self.node['projection_mode'].values()
+
+        projection_commands = {}
+        for _opt in _options:
+            split = _opt.split('\t')
+            if len(split) > 1:
+                projection_commands[split[1]] = split[0]
+            else:
+                projection_commands[split[0]] = split[0]
+
+        self.LabelCraftUI.cbx_projection_mode.addItems(projection_commands.keys())
+        self.LabelCraftUI.cbx_projection_mode.setCurrentText(str(current_state))
+
+        self.LabelCraftUI.cbx_projection_mode.currentTextChanged.connect(lambda cmd=projection_commands[self.LabelCraftUI.cbx_projection_mode.currentText()]:
+                                                                         self.change_projection(cmd))
+
+    def change_projection(self, command):
+        self.node['projection_mode'].setValue(str(command))
+
+    # Main Function that calls the corresponding Class
     def edit_node(self):
         self.node = get_selection()
+
         if not self.node:
             return
 
         self.current_node_class = self.node.Class().lower()
-        self.LabelCraftUI.grp_NodeClass.setTitle(self.node.name().lower())
+        self.LabelCraftUI.NodeClass_group.setTitle(self.node.name().lower())
 
         self.label_knob(self.node)
         self.common_knobs(self.node)
@@ -977,22 +987,17 @@ class LabelCraft:
             self.current_node_class = self.node.Class().lower()
             self.log2lin_class()
 
-        # elif self.node.Class() in ('Colorspace', 'OCIOColorSpace'):
-        #     self.current_node_class = 'colorspace'
-        #     self.colorspace_class()
-
         elif self.node.Class() in ('Dissolve', 'Switch'):
             self.current_node_class = self.node.Class().lower()
             self.switch_class()
 
-        # else:
-        #     for knob in self.node.knobs():
-        #         if knob in ('size', 'defocus'):
-        #             self.current_node_class = knob
-        #             self.filter_class()
+        elif self.node.Class() in ('ScanlineRender', 'ScanlineRender2'):
+            self.current_node_class = self.node.Class().lower()
+            self.scanline_class()
 
-        # reposition, resize and show floating Widget Window
-        self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Popup)
+        # Re-position, resize and show floating Widget Window
+        self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint |
+                                         QtCore.Qt.Popup)
 
         # Re-position UI under mouse cursor
         self.LabelCraftUI.move(QtGui.QCursor.pos().x() - (self.LabelCraftUI.width() / 2),

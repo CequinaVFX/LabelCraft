@@ -3,6 +3,10 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.17] - 2024-12-18
++ ADD ScanlineRender Class
++ ADD ZOrder to BackdropNode
+
 ## [1.0.16] - 2024-12-18
 + FINISH Switch and Dissolve class
 + ADD Disable knob expression context menu
