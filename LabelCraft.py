@@ -3,8 +3,8 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.17'
-__release_date__ = 'December, 19 2024'
+__version__ = '1.0.18'
+__release_date__ = 'December, 20 2024'
 __license__ = 'MIT'
 
 import re
@@ -174,8 +174,8 @@ class LabelCraft:
         """
 
         _credits = ('<font size=2 color=slategrey>'
-                    '<a href="{}" style="color:salmon">Label Craft</a> v {}'
-                    ' - created by <a href="{}" style="color:salmon">{}</a>').format(__website_blog__,
+                    '<a href="{}" style="rgb(255, 66, 66)">Label Craft</a> v {}'
+                    ' - created by <a href="{}" style="rgb(255, 66, 66)">{}</a>').format(__website_blog__,
                                                                                      __version__,
                                                                                      __website__,
                                                                                      __author__)
@@ -204,6 +204,9 @@ class LabelCraft:
             self.LabelCraftUI.edt_NodeLabel.setPlaceholderText(_placeholder)
         else:
             self.LabelCraftUI.edt_NodeLabel.setText(self.current_label)
+
+        _tooltip = self.node['label'].tooltip()
+        self.LabelCraftUI.edt_NodeLabel.setToolTip(_tooltip)
 
         self.LabelCraftUI.edt_NodeLabel.selectAll()
         self.LabelCraftUI.edt_NodeLabel.setTabChangesFocus(True)
@@ -297,21 +300,29 @@ class LabelCraft:
             hide_input_state = node['hide_input'].value()
             self.LabelCraftUI.ckx_HideInput.setVisible(True)
             self.LabelCraftUI.ckx_HideInput.setChecked(hide_input_state)
+            _tooltip = ' shortcut alt + h\n {}'.format(self.node['hide_input'].tooltip())
+            self.LabelCraftUI.ckx_HideInput.setToolTip(_tooltip)
 
         if 'postage_stamp' in node.knobs():
             postagestamp_state = node['postage_stamp'].value()
             self.LabelCraftUI.ckx_PostageStamp.setVisible(True)
             self.LabelCraftUI.ckx_PostageStamp.setChecked(postagestamp_state)
+            _tooltip = ' shortcut alt + p\n {}'.format(self.node['postage_stamp'].tooltip())
+            self.LabelCraftUI.ckx_PostageStamp.setToolTip(_tooltip)
 
         if 'bookmark' in node.knobs():
             bookmark_state = node['bookmark'].value()
             self.LabelCraftUI.ckx_Bookmark.setVisible(True)
             self.LabelCraftUI.ckx_Bookmark.setChecked(bookmark_state)
+            _tooltip = ' shortcut alt + k\n {}'.format(self.node['bookmark'].tooltip())
+            self.LabelCraftUI.ckx_Bookmark.setToolTip(_tooltip)
 
         if 'disable' in node.knobs():
             bookmark_state = node['disable'].value()
             self.LabelCraftUI.ckx_Disable.setVisible(True)
             self.LabelCraftUI.ckx_Disable.setChecked(bookmark_state)
+            _tooltip = ' shortcut alt + d\n {}'.format(self.node['disable'].tooltip())
+            self.LabelCraftUI.ckx_Disable.setToolTip(_tooltip)
 
         # Signals
         self.LabelCraftUI.ckx_HideInput.stateChanged.connect(self.update_hide_input_knob)
@@ -543,6 +554,9 @@ class LabelCraft:
             operation_state = str(self.node['operation'].value())
             self.LabelCraftUI.cbx_MergeOperation.setCurrentText(operation_state)
 
+            _tooltip = self.node['operation'].tooltip()
+            self.LabelCraftUI.cbx_MergeOperation.setToolTip(_tooltip)
+
         # bbox knob
         if 'bbox' in self.node.knobs():
             bbox_options = self.node['bbox'].values()
@@ -550,6 +564,9 @@ class LabelCraft:
 
             bbox_state = str(self.node['bbox'].value())
             self.LabelCraftUI.cbx_MergeBBox.setCurrentText(bbox_state)
+
+            _tooltip = self.node['bbox'].tooltip()
+            self.LabelCraftUI.cbx_MergeBBox.setToolTip(_tooltip)
 
         # mix knob
         if 'mix' in self.node.knobs():
@@ -561,6 +578,10 @@ class LabelCraft:
             self.LabelCraftUI.sld_Mix.setValue(int(mix_state * 100))
             self.LabelCraftUI.sld_Mix.setRange(0, 100)
             self.LabelCraftUI.sld_Mix.setSingleStep(0.1)
+
+            _tooltip = self.node['mix'].tooltip()
+            self.LabelCraftUI.spn_Mix.setToolTip(_tooltip)
+            self.LabelCraftUI.sld_Mix.setToolTip(_tooltip)
 
         # Signals
         self.LabelCraftUI.cbx_MergeOperation.currentTextChanged.connect(self.change_operation)

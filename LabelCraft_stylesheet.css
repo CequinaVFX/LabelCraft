@@ -1,35 +1,45 @@
+/* Overall style */
 * {
+    color: rgba(255, 255, 255, .5);
+    background: rgb(40, 40, 40);
+    selection-color: black;
+    selection-background-color: rgb(255, 66, 66);
     font-size: 10pt;
     font-family: "Courier";
     font-weight: 550;
 }
-//*
-QPushButton#btn_shuffle_red {
-    background:  red;
-    color: black
+
+/* QToolTip style */
+QToolTip {
+    background: rgb(153, 160, 178);
+    color: rgb(55, 60, 73);
+    padding: 5px;
+    radius: 20px;
+    opacity: 200;
 }
 
-QPushButton#btn_shuffle_green {
-    background:  green;
-    color: black
+/* QMenu style */
+QMenu {
+    background: rgba(65, 65, 65, .8);
+    padding: 10px;
+    selection-color: black;
+    selection-background-color: rgb(255, 66, 66);
 }
 
-QPushButton#btn_shuffle_blue {
-    background:  blue;
-    color: black
+/* QTextEdit style */
+QTextEdit::placeholder {
+  color: #767e89;
 }
 
-QPushButton#btn_shuffle_alpha {
-    background:  gray;
-    color: black
+/* QCheckBox style */
+QCheckBox {
+     spacing: 5px;
+}
+QCheckBox::indicator:checked {
+    background: rgb(255, 66, 66);
+}
+QCheckBox::indicator:unchecked {
+    background: rgb(30, 30, 30);
 }
 
-QPushButton#btn_shuffle_white {
-    background:  white;
-    color: black
-}
 
-QPushButton#btn_shuffle_black {
-    background:  black
-}
-*//

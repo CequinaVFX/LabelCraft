@@ -42,10 +42,6 @@ color: rgb(213, 213, 213);</string>
             <property name="cursor" stdset="0">
              <cursorShape>IBeamCursor</cursorShape>
             </property>
-            <property name="toolTip">
-             <string>Text to display on the node.
-Some html is accepted.</string>
-            </property>
             <property name="acceptRichText">
              <bool>true</bool>
             </property>
@@ -68,10 +64,6 @@ Some html is accepted.</string>
            <layout class="QHBoxLayout" name="horlay_checkable_knobs">
             <item>
              <widget class="QCheckBox" name="ckx_HideInput">
-              <property name="toolTip">
-               <string>use alt + h as shortcut
-Dont't draw the arrows going into this node when it is not selected.</string>
-              </property>
               <property name="text">
                <string>&amp;hide input</string>
               </property>
@@ -79,10 +71,6 @@ Dont't draw the arrows going into this node when it is not selected.</string>
             </item>
             <item>
              <widget class="QCheckBox" name="ckx_PostageStamp">
-              <property name="toolTip">
-               <string>use alt + p as shortcut
- Shows a thumbnail render of the output at the current frame or a frame of your choice</string>
-              </property>
               <property name="text">
                <string>&amp;postage stamp</string>
               </property>
@@ -90,10 +78,6 @@ Dont't draw the arrows going into this node when it is not selected.</string>
             </item>
             <item>
              <widget class="QCheckBox" name="ckx_Bookmark">
-              <property name="toolTip">
-               <string>use alt + k as shortcut
-Show this node in the Bookmark list.</string>
-              </property>
               <property name="text">
                <string>bookmar&amp;k</string>
               </property>
@@ -112,6 +96,9 @@ Show this node in the Bookmark list.</string>
            <layout class="QHBoxLayout" name="horlay_color_nodes">
             <item>
              <widget class="QPushButton" name="btn_NodeColor">
+              <property name="toolTip">
+               <string>Set a custom color to selected node.</string>
+              </property>
               <property name="text">
                <string>set node &amp;color</string>
               </property>
@@ -119,6 +106,9 @@ Show this node in the Bookmark list.</string>
             </item>
             <item>
              <widget class="QPushButton" name="btn_random_color">
+              <property name="toolTip">
+               <string>Set a random color to selected node.</string>
+              </property>
               <property name="text">
                <string>set &amp;random color</string>
               </property>
@@ -142,7 +132,11 @@ Show this node in the Bookmark list.</string>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QComboBox" name="cbx_Channels"/>
+            <widget class="QComboBox" name="cbx_Channels">
+             <property name="toolTip">
+              <string> Select a Layer to shuffle it.</string>
+             </property>
+            </widget>
            </item>
            <item row="0" column="0">
             <widget class="QLabel" name="lbl_ReadColorspace">
@@ -152,10 +146,17 @@ Show this node in the Bookmark list.</string>
             </widget>
            </item>
            <item row="0" column="1" colspan="2">
-            <widget class="QComboBox" name="cbx_Colorspace"/>
+            <widget class="QComboBox" name="cbx_Colorspace">
+             <property name="toolTip">
+              <string> Sets the color transform used to convert this file to Nuke's working space.</string>
+             </property>
+            </widget>
            </item>
            <item row="1" column="2">
             <widget class="QPushButton" name="btn_Shuffle">
+             <property name="toolTip">
+              <string> Shuffle out the selected Layer.</string>
+             </property>
              <property name="text">
               <string>shuffle it!</string>
              </property>
@@ -174,6 +175,9 @@ Show this node in the Bookmark list.</string>
              </property>
              <item>
               <widget class="QPushButton" name="btn_shuffle_white">
+               <property name="toolTip">
+                <string> Shuffle / Set all Channels to White.</string>
+               </property>
                <property name="text">
                 <string>alpha full white</string>
                </property>
@@ -181,6 +185,9 @@ Show this node in the Bookmark list.</string>
              </item>
              <item>
               <widget class="QPushButton" name="btn_shuffle_black">
+               <property name="toolTip">
+                <string> Shuffle / Set all Channels to Black.</string>
+               </property>
                <property name="text">
                 <string>alpha full black</string>
                </property>
@@ -201,6 +208,9 @@ Show this node in the Bookmark list.</string>
              </property>
              <item>
               <widget class="QPushButton" name="btn_shuffle_red">
+               <property name="toolTip">
+                <string> Shuffle / Set the Red Channel.</string>
+               </property>
                <property name="text">
                 <string>red</string>
                </property>
@@ -208,6 +218,9 @@ Show this node in the Bookmark list.</string>
              </item>
              <item>
               <widget class="QPushButton" name="btn_shuffle_green">
+               <property name="toolTip">
+                <string> Shuffle / Set the Green Channel.</string>
+               </property>
                <property name="text">
                 <string>green</string>
                </property>
@@ -215,6 +228,9 @@ Show this node in the Bookmark list.</string>
              </item>
              <item>
               <widget class="QPushButton" name="btn_shuffle_blue">
+               <property name="toolTip">
+                <string> Shuffle / Set the Blue Channel.</string>
+               </property>
                <property name="text">
                 <string>blue</string>
                </property>
@@ -222,6 +238,9 @@ Show this node in the Bookmark list.</string>
              </item>
              <item>
               <widget class="QPushButton" name="btn_shuffle_alpha">
+               <property name="toolTip">
+                <string> Shuffle / Set the Alpha Channel.</string>
+               </property>
                <property name="text">
                 <string>alpha</string>
                </property>
@@ -269,7 +288,11 @@ Show this node in the Bookmark list.</string>
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QComboBox" name="cbx_RotoCliptype"/>
+            <widget class="QComboBox" name="cbx_RotoCliptype">
+             <property name="toolTip">
+              <string> Select the crop to output.</string>
+             </property>
+            </widget>
            </item>
            <item row="3" column="2">
             <widget class="QCheckBox" name="ckx_RotoReplace">
@@ -279,10 +302,18 @@ Show this node in the Bookmark list.</string>
             </widget>
            </item>
            <item row="2" column="1" colspan="2">
-            <widget class="QComboBox" name="cbx_RotoPremult"/>
+            <widget class="QComboBox" name="cbx_RotoPremult">
+             <property name="toolTip">
+              <string> Premultiply multiplies the chosen input channels with a mask representing the roto shapes.</string>
+             </property>
+            </widget>
            </item>
            <item row="1" column="1" colspan="2">
-            <widget class="QComboBox" name="cbx_RotoOutput"/>
+            <widget class="QComboBox" name="cbx_RotoOutput">
+             <property name="toolTip">
+              <string> The roto shapes are rendered into these output channels. The output channels are the same for all shapes created using this node - you cannot create a subset of shapes and output them to a different channel.</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -316,15 +347,15 @@ Show this node in the Bookmark list.</string>
            <item row="2" column="1">
             <widget class="QSpinBox" name="spn_TrackerRefFrame">
              <property name="toolTip">
-              <string>set new reference frame</string>
+              <string> Sets the frame in the input sequence to use as the reference or identity frame.</string>
              </property>
             </widget>
            </item>
            <item row="2" column="2">
             <widget class="QPushButton" name="btn_TrackerGetFrame">
              <property name="toolTip">
-              <string>get current frame from viewer
-use alt + g as shortcut</string>
+              <string> use alt + g as shortcut
+ Set current frame from viewer</string>
              </property>
              <property name="text">
               <string>&amp;set to current</string>
@@ -334,7 +365,7 @@ use alt + g as shortcut</string>
            <item row="0" column="1" colspan="2">
             <widget class="QComboBox" name="cbx_TrackerTransform">
              <property name="toolTip">
-              <string>set new transform method</string>
+              <string> Sets the type of transform to apply.</string>
              </property>
             </widget>
            </item>
@@ -349,6 +380,9 @@ use alt + g as shortcut</string>
           <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,1,5">
            <item row="2" column="1">
             <widget class="QDoubleSpinBox" name="spn_Mix">
+             <property name="toolTip">
+              <string> Dissolves between the original image at 0 and the full merge at 1.</string>
+             </property>
              <property name="decimals">
               <number>2</number>
              </property>
@@ -362,6 +396,9 @@ use alt + g as shortcut</string>
            </item>
            <item row="2" column="2">
             <widget class="QSlider" name="sld_Mix">
+             <property name="toolTip">
+              <string> Dissolves between the original image at 0 and the full merge at 1.</string>
+             </property>
              <property name="pageStep">
               <number>1</number>
              </property>
@@ -373,7 +410,7 @@ use alt + g as shortcut</string>
            <item row="1" column="1" colspan="2">
             <widget class="QComboBox" name="cbx_MergeBBox">
              <property name="toolTip">
-              <string>set new Bbox for Merge, Channel Merge and Keymix</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt; Sets the output bounding box type and any data outside this region is clipped off.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
@@ -410,7 +447,7 @@ use alt + g as shortcut</string>
            <item row="0" column="1" colspan="2">
             <widget class="QComboBox" name="cbx_MergeOperation">
              <property name="toolTip">
-              <string>set new operation for Merge and Channel Merge</string>
+              <string> Sets the Merge algorithm to use.</string>
              </property>
             </widget>
            </item>
