@@ -65,28 +65,28 @@ color: rgb(213, 213, 213);</string>
             <item>
              <widget class="QCheckBox" name="ckx_HideInput">
               <property name="text">
-               <string>&amp;hide input</string>
+               <string>&amp;hide input   </string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QCheckBox" name="ckx_PostageStamp">
               <property name="text">
-               <string>&amp;postage stamp</string>
+               <string>&amp;postage stamp   </string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QCheckBox" name="ckx_Bookmark">
               <property name="text">
-               <string>bookmar&amp;k</string>
+               <string>bookmar&amp;k   </string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QCheckBox" name="ckx_Disable">
               <property name="text">
-               <string>&amp;disable</string>
+               <string>&amp;disable   </string>
               </property>
              </widget>
             </item>

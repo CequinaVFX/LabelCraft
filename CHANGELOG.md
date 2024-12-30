@@ -3,6 +3,9 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.19] - 2024-12-30
++ FIX some variables and PIP8 standardarization
+
 ## [1.0.18] - 2024-12-20
 + NEW css stylesheet
 + ADD ZOrder to BackdropNode

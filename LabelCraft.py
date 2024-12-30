@@ -3,8 +3,8 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.18'
-__release_date__ = 'December, 20 2024'
+__version__ = '1.0.19'
+__release_date__ = 'December, 30 2024'
 __license__ = 'MIT'
 
 import re
@@ -120,10 +120,10 @@ def get_layers(node):
 
 
 def generate_random_color():
-    COLOR_RANGE = (0.1, 0.8)
-    red = random.uniform(COLOR_RANGE[0], COLOR_RANGE[1])
-    green = random.uniform(COLOR_RANGE[0], COLOR_RANGE[1])
-    blue = random.uniform(COLOR_RANGE[0], COLOR_RANGE[1])
+    color_range = (0.1, 0.8)
+    red = random.uniform(color_range[0], color_range[1])
+    green = random.uniform(color_range[0], color_range[1])
+    blue = random.uniform(color_range[0], color_range[1])
     return int('{:02x}{:02x}{:02x}ff'.format(int(red * 255), int(green * 255), int(blue * 255)), 16)
 
 
@@ -174,11 +174,11 @@ class LabelCraft:
         """
 
         _credits = ('<font size=2 color=slategrey>'
-                    '<a href="{}" style="rgb(255, 66, 66)">Label Craft</a> v {}'
-                    ' - created by <a href="{}" style="rgb(255, 66, 66)">{}</a>').format(__website_blog__,
-                                                                                     __version__,
-                                                                                     __website__,
-                                                                                     __author__)
+                    '<a href="{}" style="color:#ff4242;">Label Craft</a> v {}'
+                    ' - created by <a href="{}"style="color:#ff4242;">{}</a>').format(__website_blog__,
+                                                                                      __version__,
+                                                                                      __website__,
+                                                                                      __author__)
 
         self.LabelCraftUI.lbl_credits.setText(_credits)
         self.LabelCraftUI.lbl_credits.setOpenExternalLinks(True)
@@ -296,6 +296,13 @@ class LabelCraft:
         self.LabelCraftUI.ckx_Bookmark.setVisible(False)
         self.LabelCraftUI.ckx_Disable.setVisible(False)
 
+        # print(node['disable'].isAnimated())
+        # print(node['disable'].hasExpression())
+        # if condition:
+        #     checkbox.setStyleSheet("color: red;")  # Set custom text color
+        # else:
+        #     checkbox.setStyleSheet("")  # Reset to use the overall stylesheet
+
         if 'hide_input' in node.knobs():
             hide_input_state = node['hide_input'].value()
             self.LabelCraftUI.ckx_HideInput.setVisible(True)
@@ -323,6 +330,17 @@ class LabelCraft:
             self.LabelCraftUI.ckx_Disable.setChecked(bookmark_state)
             _tooltip = ' shortcut alt + d\n {}'.format(self.node['disable'].tooltip())
             self.LabelCraftUI.ckx_Disable.setToolTip(_tooltip)
+
+            if any([node['disable'].isAnimated(), node['disable'].hasExpression()]):
+                # self.LabelCraftUI.ckx_Disable.setStyleSheet("color: rgb(55, 107, 189);")
+                self.LabelCraftUI.ckx_Disable.setStyleSheet("""
+                                                QCheckBox::indicator:unchecked {
+                                                    background-color: rgb(55, 107, 189);
+                                                    border: 1px solid black;
+                                                    }
+                                                """)
+            else:
+                self.LabelCraftUI.ckx_Disable.setStyleSheet("")
 
         # Signals
         self.LabelCraftUI.ckx_HideInput.stateChanged.connect(self.update_hide_input_knob)
@@ -365,9 +383,16 @@ class LabelCraft:
     def insert_disable_expression(self, expression):
         if expression:
             self.node['disable'].setExpression(expression)
+            self.LabelCraftUI.ckx_Disable.setStyleSheet("""
+                                            QCheckBox::indicator:unchecked {
+                                                background-color: rgb(55, 107, 189);
+                                                border: 1px solid black;
+                                                }
+                                            """)
         else:
             self.node['disable'].clearAnimated()
             self.node['disable'].setValue(False)
+            self.LabelCraftUI.ckx_Disable.setStyleSheet("")
 
     # Read Class functions
     def read_class(self):
@@ -515,7 +540,8 @@ class LabelCraft:
                 if track_name != "":
                     trackers.append(track_name)
                     print(track_name)
-            except:
+            except Exception as error:
+                print(error)
                 continue
 
         # return trackers
@@ -701,7 +727,7 @@ class LabelCraft:
         # Add preset actions
         for _name, _expression in sorted(self.presets_which_knob.items()):
             action = context_menu.addAction(_name[2:])
-            action.triggered.connect(lambda checked=False, p=_expression: _switch_element.setText(p))
+            action.triggered.connect(lambda checked=False, p = _expression: _switch_element.setText(p))
 
         # Show the context menu at the cursor position
         p = QtCore.QPoint()
@@ -747,8 +773,8 @@ class LabelCraft:
 
             if _knob in expression:
                 if _knob not in self.node.knobs():
-                    knob_A = nuke.Int_Knob(_knob, _knob)
-                    self.node.addKnob(knob_A)
+                    knob_a = nuke.Int_Knob(_knob, _knob)
+                    self.node.addKnob(knob_a)
 
                 self.node[_knob].setVisible(True)
                 self.node[_knob].setValue(int(current_value))
@@ -790,6 +816,9 @@ class LabelCraft:
         self.LabelCraftUI.grp_Colorspaces.setVisible(True)
         self.LabelCraftUI.grp_Colorspaces.setTitle('{} knobs'.format(self.node.Class()))
 
+        in_colorspace = None
+        out_colorspace = None
+        colorspace_options = None
         if self.node.Class() == 'OCIOColorSpace':
             self.current_node_class = 'OCIOColorSpace'
             in_colorspace = int(self.node['in_colorspace'].getValue())
@@ -1021,7 +1050,7 @@ class LabelCraft:
                                          QtCore.Qt.Popup)
 
         # Re-position UI under mouse cursor
-        self.LabelCraftUI.move(QtGui.QCursor.pos().x() - (self.LabelCraftUI.width() / 2),
+        self.LabelCraftUI.move(QtGui.QCursor.pos().x() - int(self.LabelCraftUI.width() / 2),
                                QtGui.QCursor.pos().y())
 
         # Set Focus to the Label Box
