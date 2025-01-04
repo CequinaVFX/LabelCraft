@@ -3,6 +3,11 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.20] - 2025-01-04
++ ADD docstrings to all classes and functions
++ ADD gl_color to the color node
++ REMOVE methods that wasn't in use (Text Class, Colorspace Class)
+
 ## [1.0.19] - 2024-12-30
 + FIX some variables and PIP8 standardarization
 

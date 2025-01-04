@@ -1,10 +1,16 @@
+"""
+LabelCraft is a tool for managing and editing labels in Nuke nodes. It provides a user interface for customizing
+node labels, colors, and other properties. The tool supports various node types, including Read, Shuffle, Merge, Roto,
+Tracker, and more.
+"""
+
 __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
-__website_blog__ = 'https://www.cequinavfx.com/blog/'
-__version__ = '1.0.19'
-__release_date__ = 'December, 30 2024'
+__website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
+__version__ = '1.0.20'
+__release_date__ = 'January, 04 2025'
 __license__ = 'MIT'
 
 import re
@@ -15,16 +21,17 @@ import os.path
 
 from PySide2 import QtUiTools, QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QFontComboBox, QStyleFactory, QMenu
+from PySide2.QtWidgets import QStyleFactory, QMenu
 
 
 # Global Functions
 def get_selection():
     """
-    Retrieve the selected node in Nuke.
+    Retrieve the currently selected node in Nuke.
 
     Returns:
-        node: The selected Nuke node, or None if selection is invalid.
+        nuke.Node or None: The selected node if exactly one node is selected,
+                           None if no nodes or more than one node is selected.
     """
     nodes = nuke.selectedNodes()
     if len(nodes) == 1:
@@ -33,24 +40,39 @@ def get_selection():
         print('Please, select something!')
     else:
         print('Please, select only one node!')
+
     return None
 
 
 def get_json_data(json_file):
-    with open(json_file, "r") as file:
-        data = json.load(file)
-    return data
-
-
-def split_html(html_tags):
     """
-    Parse HTML tags from a label and extract alignment, bold, italic, and icon attributes.
+    Read and parse a JSON file.
 
     Args:
-        html_tags (str): The HTML content to parse.
+        json_file (str): Path to the JSON file.
 
     Returns:
-        dict: Parsed HTML attributes {align, bold, italic, icon}.
+        dict: Parsed JSON data or None.
+    """
+    with open(json_file, "r") as file:
+        data = json.load(file)
+
+    if data:
+        return data
+
+    return None
+
+
+def extract_html_tags(html_tags):
+    """
+    Parse HTML tags to extract alignment, bold, italic, and icon attributes.
+
+    Args:
+        html_tags (str): A string containing HTML tags.
+
+    Returns:
+        dict: A dictionary with keys 'align', 'bold', 'italic', and 'icon'
+              representing the parsed attributes.
     """
     align_pattern = r'(<p align=\"(?P<align>left|center|right)\">)'
     bold_pattern = r'(?P<bold><b>)'
@@ -83,18 +105,18 @@ def split_html(html_tags):
 
 def split_label(current_label):
     """
-    Split a label into its HTML tags and text content.
+    Split the current label into HTML tags and label text.
 
     Args:
-        current_label (str): The label to split.
+        current_label (str): The current label string.
 
     Returns:
-        tuple: (dict, str) where dict contains HTML attributes and str is label text.
+        tuple: A tuple containing a dictionary of HTML tags and the label text.
     """
     html_pattern = r'(?P<HTML>\<.*\>)(?P<label>.*)'
     html_search = re.search(html_pattern, current_label)
     if html_search:
-        html_tags = split_html(html_search.group('HTML'))
+        html_tags = extract_html_tags(html_search.group('HTML'))
         return html_tags, html_search.group('label')
 
     else:
@@ -107,19 +129,25 @@ def split_label(current_label):
 
 def get_layers(node):
     """
-    Retrieve all layers from a given Nuke node.
+    Get the layers of a given node.
 
     Args:
-        node: The Nuke node to analyze.
+        node (nuke.Node): The node to get layers from.
 
     Returns:
-        list: Sorted list of layers available in the node.
+        list: A sorted list of layers.
     """
     node_layers = nuke.layers(node)
     return sorted(node_layers)
 
 
 def generate_random_color():
+    """
+    Generate a random color.
+
+    Returns:
+        int: The generated color in hexadecimal format.
+    """
     color_range = (0.1, 0.8)
     red = random.uniform(color_range[0], color_range[1])
     green = random.uniform(color_range[0], color_range[1])
@@ -128,9 +156,12 @@ def generate_random_color():
 
 
 class LabelCraft:
+    """
+    LabelCraft class for managing and editing labels in Nuke nodes.
+    """
     def __init__(self):
         """
-            Start UI
+        Initialize the LabelCraft UI.
         """
 
         package_path = os.path.dirname(__file__)
@@ -192,6 +223,13 @@ class LabelCraft:
 
     # Label Knob
     def label_knob(self, node):
+        """
+        Set up the label knob for the given node.
+
+        Args:
+            node (nuke.Node): The node to set up the label knob for.
+        """
+
         if self.current_node_class in ('backdropnode', 'stickynote', 'dot'):
             self.html_tags, self.current_label = split_label(node['label'].value())
         else:
@@ -222,6 +260,9 @@ class LabelCraft:
         self.LabelCraftUI.edt_NodeLabel.customContextMenuRequested.connect(self.show_label_context_menu)
 
     def show_label_context_menu(self):
+        """
+        Show the context menu for label presets.
+        """
         self.presets_label_knob = []
         if self.current_node_class in self.label_presets.keys():
             self.presets_label_knob = self.label_presets[self.current_node_class]
@@ -240,11 +281,20 @@ class LabelCraft:
             context_menu.exec_(p)
 
     def insert_preset_text(self, preset_text):
+        """
+        Insert preset text into the label.
+
+        Args:
+            preset_text (str): The preset text to insert.
+        """
         cursor = self.LabelCraftUI.edt_NodeLabel.textCursor()
         cursor.insertText(preset_text)
         self.LabelCraftUI.edt_NodeLabel.setTextCursor(cursor)
 
     def update_label_text(self):
+        """
+        Update the label text based on user input.
+        """
         new_label = self.LabelCraftUI.edt_NodeLabel.toPlainText()
 
         if self.current_node_class in ('backdropnode', 'stickynote', 'dot'):
@@ -282,26 +332,33 @@ class LabelCraft:
             self.node['label'].setValue(new_label)
 
     def update_node_color(self, method):
+        """
+        Update the node color based on the specified method.
+        : get (str): Get the color from the color picker.
+        : random (str): Generate a random color.
+        Args:
+            method (str): The method to use for updating the color.
+        """
         current_color = self.node['tile_color'].value()
         new_color = generate_random_color()
         if method == 'get':
             new_color = nuke.getColor(current_color)
 
         self.node['tile_color'].setValue(new_color)
+        self.node['gl_color'].setValue(new_color)
 
-    # Common Knobs (HideInput, PostageStamp, Bookmark)
+    # Common Knobs (HideInput, PostageStamp, Bookmark, Disable)
     def common_knobs(self, node):
+        """
+        Set up common knobs (HideInput, PostageStamp, Bookmark, Disable) for the given node.
+
+        Args:
+            node (nuke.Node): The node to set up common knobs for.
+        """
         self.LabelCraftUI.ckx_HideInput.setVisible(False)
         self.LabelCraftUI.ckx_PostageStamp.setVisible(False)
         self.LabelCraftUI.ckx_Bookmark.setVisible(False)
         self.LabelCraftUI.ckx_Disable.setVisible(False)
-
-        # print(node['disable'].isAnimated())
-        # print(node['disable'].hasExpression())
-        # if condition:
-        #     checkbox.setStyleSheet("color: red;")  # Set custom text color
-        # else:
-        #     checkbox.setStyleSheet("")  # Reset to use the overall stylesheet
 
         if 'hide_input' in node.knobs():
             hide_input_state = node['hide_input'].value()
@@ -332,7 +389,6 @@ class LabelCraft:
             self.LabelCraftUI.ckx_Disable.setToolTip(_tooltip)
 
             if any([node['disable'].isAnimated(), node['disable'].hasExpression()]):
-                # self.LabelCraftUI.ckx_Disable.setStyleSheet("color: rgb(55, 107, 189);")
                 self.LabelCraftUI.ckx_Disable.setStyleSheet("""
                                                 QCheckBox::indicator:unchecked {
                                                     background-color: rgb(55, 107, 189);
@@ -352,18 +408,27 @@ class LabelCraft:
         self.LabelCraftUI.ckx_Disable.customContextMenuRequested.connect(self.show_disable_context_menu)
 
     def update_hide_input_knob(self):
+        """
+        Update the hide input knob based on user input.
+        """
         self.node['hide_input'].setValue(self.LabelCraftUI.ckx_HideInput.checkState())
 
     def update_postagestamp_knob(self):
+        """
+        Update the postage stamp knob based on user input.
+        """
         self.node['postage_stamp'].setValue(self.LabelCraftUI.ckx_PostageStamp.checkState())
 
     def update_bookmark_knob(self):
+        """
+        Update the bookmark knob based on user input.
+        """
         self.node['bookmark'].setValue(self.LabelCraftUI.ckx_Bookmark.checkState())
 
-    def update_disable_knob(self):
-        self.node['disable'].setValue(self.LabelCraftUI.ckx_Disable.checkState())
-
     def show_disable_context_menu(self):
+        """
+        Show the context menu for disable knob.
+        """
         self.presets_disable_knob = self.disable_expressions
 
         context_menu = QMenu(self.LabelCraftUI.ckx_Disable)
@@ -381,6 +446,12 @@ class LabelCraft:
         context_menu.exec_(p)
 
     def insert_disable_expression(self, expression):
+        """
+        Insert a disable expression into the node.
+
+        Args:
+            expression (str): The expression to insert.
+        """
         if expression:
             self.node['disable'].setExpression(expression)
             self.LabelCraftUI.ckx_Disable.setStyleSheet("""
@@ -394,8 +465,17 @@ class LabelCraft:
             self.node['disable'].setValue(False)
             self.LabelCraftUI.ckx_Disable.setStyleSheet("")
 
+    def update_disable_knob(self):
+        """
+        Update the disable knob based on user input.
+        """
+        self.node['disable'].setValue(self.LabelCraftUI.ckx_Disable.checkState())
+
     # Read Class functions
     def read_class(self):
+        """
+        Set up the UI for Read nodes.
+        """
         self.LabelCraftUI.grp_Read.setVisible(True)
 
         colorspace_options = self.node['colorspace'].values()
@@ -424,6 +504,9 @@ class LabelCraft:
         self.LabelCraftUI.btn_shuffle_black.clicked.connect(lambda: self.pressed_shuffle('black'))
 
     def shuffle_class(self):
+        """
+        Set up the UI for Shuffle nodes.
+        """
         self.LabelCraftUI.grp_Read.setVisible(True)
         self.LabelCraftUI.lbl_ReadColorspace.setVisible(False)
         self.LabelCraftUI.cbx_Colorspace.setVisible(False)
@@ -446,13 +529,22 @@ class LabelCraft:
         self.LabelCraftUI.btn_shuffle_black.clicked.connect(lambda: self.pressed_shuffle('black'))
 
     def change_read_colorspace(self):
+        """
+        Change the colorspace of the Read node.
+        """
         self.node['colorspace'].setValue(str(self.LabelCraftUI.cbx_Colorspace.currentText()))
 
     def change_shuffle_channel(self):
+        """
+        Change the input channel of the Shuffle node.
+        """
         if self.current_node_class in ('shuffle', 'shuffle2'):
             self.node['in'].setValue(str(self.LabelCraftUI.cbx_Channels.currentText()))
 
     def shuffle_layer(self):
+        """
+        Create a Shuffle node for the selected layer.
+        """
         chosen_layer = str(self.LabelCraftUI.cbx_Channels.currentText())
 
         if chosen_layer in ('red', 'green', 'blue', 'alpha'):
@@ -463,7 +555,6 @@ class LabelCraft:
             shuffle_node['blue'].setValue(chosen_layer)
             shuffle_node['alpha'].setValue(chosen_layer)
 
-        # elif chosen_layer != 'none':
         else:
             shuffle_node = nuke.nodes.Shuffle(name="Shuffle_" + chosen_layer, inputs=[self.node])
             shuffle_node.knob("in").setValue(chosen_layer)
@@ -471,6 +562,12 @@ class LabelCraft:
         self.LabelCraftUI.close()
 
     def pressed_shuffle(self, selected_shuffle):
+        """
+        Create and configure a Shuffle node based on the selected shuffle channel.
+
+        Args:
+            selected_shuffle (str): The selected shuffle channel.
+        """
         shuffle_node = self.node
 
         if self.current_node_class == 'read':
@@ -505,11 +602,15 @@ class LabelCraft:
                       'black': 255}
 
         shuffle_node['tile_color'].setValue(node_color[selected_shuffle])
+        shuffle_node['gl_color'].setValue(node_color[selected_shuffle])
 
         self.LabelCraftUI.close()
 
     # Tracker Class functions
     def tracker_class(self):
+        """
+        Set up the UI for Tracker nodes.
+        """
         self.LabelCraftUI.grp_Tracker.setVisible(True)
         self.LabelCraftUI.grp_Tracker.setTitle('Tracker knobs')
 
@@ -530,6 +631,9 @@ class LabelCraft:
         self.LabelCraftUI.btn_TrackerGetFrame.clicked.connect(self.press_get_current_frame)
 
     def get_tracks_names(self):
+        """
+        Retrieve and print the names of the tracks in the Tracker node.
+        """
         n = self.node["tracks"].toScript()
         rows = n.split("\n")[34:]
 
@@ -539,7 +643,6 @@ class LabelCraft:
                 track_name = i.split("}")[1].split("{")[0][2:-2]
                 if track_name != "":
                     trackers.append(track_name)
-                    print(track_name)
             except Exception as error:
                 print(error)
                 continue
@@ -547,17 +650,29 @@ class LabelCraft:
         # return trackers
 
     def change_reference(self):
+        """
+        Change the reference frame of the Tracker node.
+        """
         self.node['reference_frame'].setValue(self.LabelCraftUI.spn_TrackerRefFrame.value())
 
     def change_transform(self):
+        """
+        Change the transform mode of the Tracker node.
+        """
         self.node['transform'].setValue(str(self.LabelCraftUI.cbx_TrackerTransform.currentText()))
 
     def press_get_current_frame(self):
+        """
+        Set the reference frame of the Tracker node to the current frame.
+        """
         self.LabelCraftUI.spn_TrackerRefFrame.setValue(nuke.frame())
         self.node['reference_frame'].setValue(nuke.frame())
 
     # Merge Class functions
     def merge_class(self):
+        """
+        Set up the UI for Merge nodes.
+        """
         # set group to visible and edit the group's name
         self.LabelCraftUI.grp_Merge.setVisible(True)
         self.LabelCraftUI.grp_Merge.setTitle('{} knobs'.format(self.node.Class()))
@@ -616,20 +731,32 @@ class LabelCraft:
         self.LabelCraftUI.sld_Mix.valueChanged.connect(self.change_slider_mix)
 
     def change_operation(self):
+        """
+        Change the operation mode of the Merge node.
+        """
         new_operation = str(self.LabelCraftUI.cbx_MergeOperation.currentText())
         self.node['operation'].setValue(new_operation)
 
     def change_bbox(self):
+        """
+        Change the bounding box mode of the Merge node.
+        """
         new_bbox = str(self.LabelCraftUI.cbx_MergeBBox.currentText())
         self.node['bbox'].setValue(new_bbox)
 
     def change_spin_mix(self):
+        """
+        Change the mix value of the Merge node using the spin box.
+        """
         new_mix = float(self.LabelCraftUI.spn_Mix.value())
         self.LabelCraftUI.sld_Mix.setValue(int(new_mix * 100))
 
         self.node['mix'].setValue(new_mix)
 
     def change_slider_mix(self):
+        """
+        Change the mix value of the Merge node using the slider.
+        """
         new_mix = (float(self.LabelCraftUI.sld_Mix.value()) / 100)
         self.LabelCraftUI.spn_Mix.setValue(new_mix)
 
@@ -637,6 +764,9 @@ class LabelCraft:
 
     # Roto/ RotoPaint Class functions
     def roto_class(self):
+        """
+        Set up the UI for Roto and RotoPaint nodes.
+        """
         self.LabelCraftUI.grp_Roto.setVisible(True)
         self.LabelCraftUI.grp_Roto.setTitle(self.node.Class())
 
@@ -665,22 +795,37 @@ class LabelCraft:
         self.LabelCraftUI.ckx_RotoReplace.stateChanged.connect(self.change_replace)
 
     def change_output(self):
+        """
+        Change the output layer of the Roto node.
+        """
         new_output = str(self.LabelCraftUI.cbx_RotoOutput.currentText())
         self.node['output'].setValue(new_output)
 
     def change_premult(self):
+        """
+        Change the premultiply layer of the Roto node.
+        """
         new_premult = str(self.LabelCraftUI.cbx_RotoPremult.currentText())
         self.node['premultiply'].setValue(new_premult)
 
     def change_cliptype(self):
+        """
+        Change the clip type of the Roto node.
+        """
         new_cliptype = str(self.LabelCraftUI.cbx_RotoCliptype.currentText())
         self.node['cliptype'].setValue(new_cliptype)
 
     def change_replace(self):
+        """
+        Change the replace knob of the Roto node.
+        """
         self.node['replace'].setValue(self.LabelCraftUI.ckx_RotoReplace.checkState())
 
     # Switch/ Dissolve Class function
     def switch_class(self):
+        """
+        Set up the UI for Switch and Dissolve nodes.
+        """
         self.LabelCraftUI.grp_Switch.setVisible(True)
         self.LabelCraftUI.grp_Switch.setTitle('{} knobs'.format(self.node.Class()))
 
@@ -718,6 +863,9 @@ class LabelCraft:
         self.LabelCraftUI.edt_SwitchWhich.textChanged.connect(self.which_change)
 
     def show_expression_context_menu(self):
+        """
+        Show the context menu for expression presets.
+        """
         self.presets_which_knob = self.which_expressions[self.current_node_class]
 
         _switch_element = self.LabelCraftUI.edt_SwitchWhich
@@ -736,6 +884,9 @@ class LabelCraft:
         context_menu.exec_(p)
 
     def which_change(self):
+        """
+        Update the 'which' knob based on user input.
+        """
         _which = self.LabelCraftUI.edt_SwitchWhich.text()
 
         if _which.isdigit():
@@ -751,9 +902,22 @@ class LabelCraft:
             self.manage_knobs(expression=_which)
 
     def change_expression_value(self, knob, value):
+        """
+        Change the value of the specified knob.
+
+        Args:
+            knob (str): The name of the knob.
+            value (int): The new value for the knob.
+        """
         self.node[knob].setValue(value)
 
     def manage_knobs(self, expression):
+        """
+        Manage the visibility and values of knobs based on the expression.
+
+        Args:
+            expression (str): The expression to manage knobs for.
+        """
         if 'which_expression' in self.node.knobs():
             self.node['which_expression'].setValue(expression)
         elif expression:
@@ -788,6 +952,9 @@ class LabelCraft:
 
     # Log2Lin/ OCIOLogConvert Class function
     def log2lin_class(self):
+        """
+        Set up the UI for Log2Lin and OCIOLogConvert nodes.
+        """
         self.LabelCraftUI.grp_Colorspaces.setVisible(True)
         self.LabelCraftUI.grp_Colorspaces.setTitle('{} knob'.format(self.node.Class()))
 
@@ -809,92 +976,16 @@ class LabelCraft:
         self.LabelCraftUI.cbx_ColorValueA.currentTextChanged.connect(self.log_change)
 
     def log_change(self):
+        """
+        Change the operation mode of the Log2Lin or OCIOLogConvert node.
+        """
         self.node['operation'].setValue(str(self.LabelCraftUI.cbx_ColorValueA.currentText()))
-
-    # OCIOColorspace/ Colorspace Class function
-    def colorspace_class(self):
-        self.LabelCraftUI.grp_Colorspaces.setVisible(True)
-        self.LabelCraftUI.grp_Colorspaces.setTitle('{} knobs'.format(self.node.Class()))
-
-        in_colorspace = None
-        out_colorspace = None
-        colorspace_options = None
-        if self.node.Class() == 'OCIOColorSpace':
-            self.current_node_class = 'OCIOColorSpace'
-            in_colorspace = int(self.node['in_colorspace'].getValue())
-            out_colorspace = int(self.node['out_colorspace'].getValue())
-            colorspace_options = self.node['in_colorspace'].values()
-
-        if self.node.Class() == 'Colorspace':
-            in_colorspace = int(self.node['colorspace_in'].getValue())
-            out_colorspace = int(self.node['colorspace_out'].getValue())
-            colorspace_options = self.node['colorspace_in'].values()
-
-        cleanup_list = []
-        for item in colorspace_options:
-            if re.findall('\\t', item):
-                g = item.split('\t')[1]
-                cleanup_list.append(g)
-            else:
-                cleanup_list.append(item)
-
-        self.LabelCraftUI.lbl_ColorValueA.setVisible(False)
-        self.LabelCraftUI.lbl_ColorValueB.setVisible(False)
-
-        self.LabelCraftUI.cbx_ColorValueA.setVisible(True)
-        self.LabelCraftUI.cbx_ColorValueB.setVisible(True)
-        self.LabelCraftUI.btn_ColorspaceSwap.setVisible(True)
-
-        self.LabelCraftUI.cbx_ColorValueA.addItems(cleanup_list)
-        self.LabelCraftUI.cbx_ColorValueA.setCurrentIndex(in_colorspace)
-
-        self.LabelCraftUI.cbx_ColorValueB.addItems(cleanup_list)
-        self.LabelCraftUI.cbx_ColorValueB.setCurrentIndex(out_colorspace)
-
-        self.LabelCraftUI.cbx_ColorValueA.currentTextChanged.connect(self.change_colorspace)
-        self.LabelCraftUI.cbx_ColorValueB.currentTextChanged.connect(self.change_colorspace)
-        self.LabelCraftUI.btn_ColorspaceSwap.clicked.connect(self.swap_colorspace)
-
-    def change_colorspace(self):
-        if self.node.Class() == 'OCIOColorSpace':
-            self.node['in_colorspace'].setValue(str(self.LabelCraftUI.cbx_ColorValueA.currentText()))
-            self.node['out_colorspace'].setValue(str(self.LabelCraftUI.cbx_ColorValueB.currentText()))
-
-        elif self.node.Class() == 'Colorspace':
-            self.node['colorspace_in'].setValue(str(self.LabelCraftUI.cbx_ColorValueA.currentIndex()))
-            self.node['colorspace_out'].setValue(str(self.LabelCraftUI.cbx_ColorValueB.currentIndex()))
-
-    def swap_colorspace(self):
-        value_a = str(self.LabelCraftUI.cbx_ColorValueA.currentText())
-        value_b = str(self.LabelCraftUI.cbx_ColorValueB.currentText())
-        self.LabelCraftUI.cbx_ColorValueA.setCurrentText(value_b)
-        self.LabelCraftUI.cbx_ColorValueB.setCurrentText(value_a)
-
-    # Text2 Class
-    def text_class(self):
-        self.LabelCraftUI.lbl_NodeLabel.setText('message')
-
-        message = self.node['message'].value()
-        self.LabelCraftUI.edt_NodeLabel.setText(message)
-
-        self.LabelCraftUI.fnt_FontFace.setFontFilters(QFontComboBox.ProportionalFonts)
-
-        self.LabelCraftUI.grp_Dot.setVisible(True)
-        self.LabelCraftUI.grp_Dot.setTitle('Text options')
-
-        self.LabelCraftUI.edt_NodeLabel.textChanged.connect(self.change_message)
-        self.LabelCraftUI.fnt_FontFace.currentFontChanged.connect(self.change_message_font)
-
-    def change_message(self):
-        new_label = self.LabelCraftUI.edt_NodeLabel.toPlainText()
-        self.node['message'].setValue(new_label)
-
-    def change_message_font(self):
-        font = self.LabelCraftUI.fnt_FontFace.currentFont().family()
-        self.node['font'].setValue(font, 'Regular')
 
     # Dot/ Backdrop/ StickyNote Class function
     def info_class(self):
+        """
+        Set up the UI for Dot, Backdrop, and StickyNote nodes.
+        """
         self.LabelCraftUI.grp_Info.setVisible(True)
         self.LabelCraftUI.grp_Info.setTitle('{} knobs'.format(self.node.Class()))
 
@@ -956,23 +1047,38 @@ class LabelCraft:
         self.LabelCraftUI.btn_FontColor.clicked.connect(self.change_font_color)
 
     def change_font_family(self):
+        """
+        Change the font family of the note.
+        """
         new_font = str(self.LabelCraftUI.fnt_FontFace.currentFont().family())
         self.node['note_font'].setValue(new_font)
 
     def change_font_size(self):
+        """
+        Change the font size of the note.
+        """
         font_size = self.LabelCraftUI.spn_InfoFontSize.value()
         self.node['note_font_size'].setValue(font_size)
 
     def change_font_color(self):
+        """
+        Change the font color of the note.
+        """
         old_color = self.node['note_font_color'].value()
         new_color = nuke.getColor(old_color)
         self.node['note_font_color'].setValue(new_color)
 
     def change_zorder(self, value):
+        """
+        Change the Z-order of the backdrop node.
+        """
         self.node['z_order'].setValue(int(value))
 
     # ScanlineRender Class functions
     def scanline_class(self):
+        """
+        Set up the UI for ScanlineRender nodes.
+        """
         self.LabelCraftUI.grp_Scanline.setVisible(True)
         self.LabelCraftUI.grp_Scanline.setTitle('{}'.format(self.node.Class()))
 
@@ -994,10 +1100,16 @@ class LabelCraft:
                                                                          self.change_projection(cmd))
 
     def change_projection(self, command):
+        """
+        Change the projection mode of the ScanlineRender node.
+        """
         self.node['projection_mode'].setValue(str(command))
 
     # Main Function that calls the corresponding Class
     def edit_node(self):
+        """
+        Edit the selected node by setting up the appropriate UI components based on the node class.
+        """
         self.node = get_selection()
 
         if not self.node:
@@ -1063,9 +1175,11 @@ class LabelCraft:
 
 
 def edit_label():
-    global runTool
-    runTool = LabelCraft()
-    runTool.edit_node()
+    """
+    Initialize and run the LabelCraft tool to edit the label of the selected node.
+    """
+    run_labelcraft = LabelCraft()
+    run_labelcraft.edit_node()
 
 
 if __name__ == '__main__':
