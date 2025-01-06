@@ -11,6 +11,8 @@ LabelCraft is a comprehensive labeling tool designed for Foundry's Nuke software
 - Node-specific presets for quick label application.
 - Supports Python 2.7 and 3.7, ensuring compatibility across Nuke versions.
 
+A detailed guide on how to use LabelCraft is available at [CequinaVFX's blog](https://www.cequinavfx.com/post/label-craft).
+
 ## Requirements
 - **Nuke:** Version 11 or later.
 - **Operating System:** Windows, macOS, or Linux.

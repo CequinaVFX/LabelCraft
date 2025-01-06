@@ -3,6 +3,9 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.24] - 2025-01-06
++ ADD link to blog post in README.md
+
 ## [1.0.23] - 2025-01-06
 + FIX Dissolve expressions names
 + ADD disclaimer note to the json file
