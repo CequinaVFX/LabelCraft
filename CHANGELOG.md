@@ -3,6 +3,9 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.22] - 2025-01-06
++ FIX Fade out Linear expression
+
 ## [1.0.21] - 2025-01-06
 + ADD visual indicator to Mix knob (Merge Class) when its animated/ has expression
 + ADD visual indicator to Which knob (Switch Class) when its animated/ has expression
