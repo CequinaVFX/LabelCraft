@@ -9,8 +9,8 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.0.20'
-__release_date__ = 'January, 04 2025'
+__version__ = '1.0.21'
+__release_date__ = 'January, 06 2025'
 __license__ = 'MIT'
 
 import re
@@ -713,6 +713,16 @@ class LabelCraft:
         if 'mix' in self.node.knobs():
             mix_state = self.node['mix'].value()
 
+            if any([self.node['mix'].isAnimated(), self.node['mix'].hasExpression()]):
+                self.LabelCraftUI.lbl_Mix.setStyleSheet("""
+                                                    QLabel{
+                                                        background-color: rgb(55, 107, 189);
+                                                        padding: 3px;
+                                                        }
+                                                    """)
+            else:
+                self.LabelCraftUI.lbl_Mix.setStyleSheet("")
+
             self.LabelCraftUI.spn_Mix.setRange(0, 1)
             self.LabelCraftUI.spn_Mix.setValue(mix_state)
 
@@ -837,6 +847,17 @@ class LabelCraft:
             current_which = int(self.node['which'].value())
             self.LabelCraftUI.edt_SwitchWhich.setText(str(current_which))
 
+        if any([self.node['which'].isAnimated(), self.node['which'].hasExpression()]):
+                self.LabelCraftUI.lbl_SwitchWhich.setStyleSheet("""
+                                                    QLabel{
+                                                        background-color: rgb(55, 107, 189);
+                                                        padding: 3px;
+                                                        }
+                                                    """)
+        else:
+            self.LabelCraftUI.lbl_SwitchWhich.setStyleSheet("")
+
+
         knobs = ['value_A', 'value_B', 'value_C', 'value_D']
 
         for v, knob in enumerate(knobs):
@@ -868,14 +889,12 @@ class LabelCraft:
         """
         self.presets_which_knob = self.which_expressions[self.current_node_class]
 
-        _switch_element = self.LabelCraftUI.edt_SwitchWhich
-
         context_menu = QMenu(self.LabelCraftUI.edt_SwitchWhich)
 
         # Add preset actions
         for _name, _expression in sorted(self.presets_which_knob.items()):
             action = context_menu.addAction(_name[2:])
-            action.triggered.connect(lambda checked=False, p = _expression: _switch_element.setText(p))
+            action.triggered.connect(lambda checked=False, p = _expression: self.LabelCraftUI.edt_SwitchWhich.setText(p))
 
         # Show the context menu at the cursor position
         p = QtCore.QPoint()
@@ -893,13 +912,21 @@ class LabelCraft:
             self.node['which'].clearAnimated()
             self.node['which'].setValue(_which)
             self.manage_knobs(expression='')
+            self.LabelCraftUI.lbl_SwitchWhich.setStyleSheet("")
         elif _which == '':
             self.node['which'].clearAnimated()
             self.node['which'].setValue(0)
             self.manage_knobs(expression='')
+            self.LabelCraftUI.lbl_SwitchWhich.setStyleSheet("")
         else:
             self.node['which'].setExpression(_which)
             self.manage_knobs(expression=_which)
+            self.LabelCraftUI.lbl_SwitchWhich.setStyleSheet("""
+                                                QLabel{
+                                                    background-color: rgb(55, 107, 189);
+                                                    padding: 3px;
+                                                    }
+                                                """)
 
     def change_expression_value(self, knob, value):
         """

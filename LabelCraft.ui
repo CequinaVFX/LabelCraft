@@ -100,7 +100,7 @@ color: rgb(213, 213, 213);</string>
                <string>Set a custom color to selected node.</string>
               </property>
               <property name="text">
-               <string>set node &amp;color</string>
+               <string>set &amp;color</string>
               </property>
              </widget>
             </item>
@@ -110,7 +110,7 @@ color: rgb(213, 213, 213);</string>
                <string>Set a random color to selected node.</string>
               </property>
               <property name="text">
-               <string>set &amp;random color</string>
+               <string>&amp;random color</string>
               </property>
              </widget>
             </item>
