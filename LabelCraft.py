@@ -9,7 +9,7 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.0.22'
+__version__ = '1.0.23'
 __release_date__ = 'January, 06 2025'
 __license__ = 'MIT'
 

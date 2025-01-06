@@ -3,6 +3,10 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.23] - 2025-01-06
++ FIX Dissolve expressions names
++ ADD disclaimer note to the json file
+
 ## [1.0.22] - 2025-01-06
 + FIX Fade out Linear expression
 
