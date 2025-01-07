@@ -3,6 +3,9 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.25] - 2025-01-08
++ FIX UI tab order
+
 ## [1.0.24] - 2025-01-06
 + ADD link to blog post in README.md
 

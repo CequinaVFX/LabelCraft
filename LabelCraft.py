@@ -9,8 +9,8 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.0.24'
-__release_date__ = 'January, 06 2025'
+__version__ = '1.0.25'
+__release_date__ = 'January, 08 2025'
 __license__ = 'MIT'
 
 import re

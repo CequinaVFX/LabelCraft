@@ -855,6 +855,54 @@ set in colorspace for OCIOColorspace and Colorspace</string>
  </widget>
  <tabstops>
   <tabstop>edt_NodeLabel</tabstop>
+  <tabstop>ckx_HideInput</tabstop>
+  <tabstop>ckx_PostageStamp</tabstop>
+  <tabstop>ckx_Bookmark</tabstop>
+  <tabstop>ckx_Disable</tabstop>
+  <tabstop>btn_NodeColor</tabstop>
+  <tabstop>btn_random_color</tabstop>
+  <tabstop>cbx_Colorspace</tabstop>
+  <tabstop>cbx_Channels</tabstop>
+  <tabstop>btn_Shuffle</tabstop>
+  <tabstop>btn_shuffle_red</tabstop>
+  <tabstop>btn_shuffle_green</tabstop>
+  <tabstop>btn_shuffle_blue</tabstop>
+  <tabstop>btn_shuffle_alpha</tabstop>
+  <tabstop>btn_shuffle_white</tabstop>
+  <tabstop>btn_shuffle_black</tabstop>
+  <tabstop>cbx_RotoOutput</tabstop>
+  <tabstop>cbx_RotoPremult</tabstop>
+  <tabstop>cbx_RotoCliptype</tabstop>
+  <tabstop>ckx_RotoReplace</tabstop>
+  <tabstop>cbx_TrackerTransform</tabstop>
+  <tabstop>spn_TrackerRefFrame</tabstop>
+  <tabstop>btn_TrackerGetFrame</tabstop>
+  <tabstop>cbx_MergeOperation</tabstop>
+  <tabstop>cbx_MergeBBox</tabstop>
+  <tabstop>spn_Mix</tabstop>
+  <tabstop>sld_Mix</tabstop>
+  <tabstop>fnt_FontFace</tabstop>
+  <tabstop>btn_FontColor</tabstop>
+  <tabstop>cbx_InfoAlign</tabstop>
+  <tabstop>cbx_InfoIcon</tabstop>
+  <tabstop>spn_InfoFontSize</tabstop>
+  <tabstop>ckx_InfoBold</tabstop>
+  <tabstop>ckx_InfoItalic</tabstop>
+  <tabstop>spn_InfoZOrder</tabstop>
+  <tabstop>cbx_FilterChannels</tabstop>
+  <tabstop>spn_FilterSize</tabstop>
+  <tabstop>sld_FilterSize</tabstop>
+  <tabstop>spn_FilterSizeB</tabstop>
+  <tabstop>sld_FilterSizeB</tabstop>
+  <tabstop>edt_SwitchWhich</tabstop>
+  <tabstop>spn_Switch_value_A</tabstop>
+  <tabstop>spn_Switch_value_B</tabstop>
+  <tabstop>spn_Switch_value_C</tabstop>
+  <tabstop>spn_Switch_value_D</tabstop>
+  <tabstop>cbx_ColorValueA</tabstop>
+  <tabstop>cbx_ColorValueB</tabstop>
+  <tabstop>btn_ColorspaceSwap</tabstop>
+  <tabstop>cbx_projection_mode</tabstop>
  </tabstops>
  <resources/>
  <connections/>

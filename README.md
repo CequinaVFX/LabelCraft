@@ -30,7 +30,7 @@ A detailed guide on how to use LabelCraft is available at [CequinaVFX's blog](ht
    import nuke 
    nuke.pluginAddPath('./LabelCraft')
    ```
-Where to find the .nuke folder: https://learn.foundry.com/nuke/12.2/content/user_guide/configuring_nuke/finding_nuke_home.html
+[Where to find the .nuke folder](https://learn.foundry.com/nuke/12.2/content/user_guide/configuring_nuke/finding_nuke_home.html)
 
 ## License
 This project is licensed under the MIT License.
