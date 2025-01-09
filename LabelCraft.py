@@ -9,8 +9,8 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.0.25'
-__release_date__ = 'January, 08 2025'
+__version__ = '1.0.26'
+__release_date__ = 'January, 09 2025'
 __license__ = 'MIT'
 
 import re
@@ -113,13 +113,14 @@ def split_label(current_label):
     Returns:
         tuple: A tuple containing a dictionary of HTML tags and the label text.
     """
-    html_pattern = r'(?P<HTML>\<.*\>)(?P<label>.*)'
-    html_search = re.search(html_pattern, current_label)
+    html_pattern = r"(?P<HTML>\<.*\>)(?P<label>.*)"
+    html_search = re.search(html_pattern, current_label, re.DOTALL)
     if html_search:
         html_tags = extract_html_tags(html_search.group('HTML'))
         return html_tags, html_search.group('label')
 
     else:
+        print('no html')
         return ({'align': 'center',
                  'bold': True,
                  'italic': True,
@@ -346,6 +347,10 @@ class LabelCraft:
 
         self.node['tile_color'].setValue(new_color)
         self.node['gl_color'].setValue(new_color)
+
+        if 'color_group' in self.node.knobs():
+            self.node['color_group'].setValue(str(new_color))
+
 
     # Common Knobs (HideInput, PostageStamp, Bookmark, Disable)
     def common_knobs(self, node):

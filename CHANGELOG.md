@@ -3,6 +3,9 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.26] - 2025-01-09
++ FIX regex expression to return the correct label for StickyNote and Backdrop
+
 ## [1.0.25] - 2025-01-08
 + FIX UI tab order
 
