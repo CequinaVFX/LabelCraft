@@ -14,7 +14,7 @@
                                   "[value out2]"],
                      "roto": ["[value reference_frame]",
                               "[value output]"],
-                     "switch": ["[value which]", "Input 1 after [value value_A]", "Input 0 before [value value_A]"],
+                     "switch": ["[value which]", "Input 1 after [value value_A]", "Input 0 before [value value_A]", "Input = [value error]"],
                      "dissolve": ["[value which]"],
                      "framehold": ["[value first_frame]"],
                      "log": ["[value operation]"],
@@ -65,7 +65,8 @@
                    "c input 1 at frame": "frame == value_A",
                    "d input 1 after frame": "frame > value_A",
                    "e input 1 before frame": "frame < value_A",
-                   "f input 1 inbetween range": "inrange(frame, value_A, value_B)"
+                   "f input 1 inbetween range": "inrange(frame, value_A, value_B)",
+                   "g input 0 when error input 1": "[value error]"
         },
 
         "dissolve": {"a fade in linear": "clamp( ( frame - value_A ) / ( value_B - value_A) )",
