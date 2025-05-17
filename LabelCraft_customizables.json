@@ -1,83 +1,181 @@
 {
-    "label_presets": {"tracker4": ["[value transform] : [value reference_frame]",
-                                   "[value reference_frame]",
-                                   "[value transform]",
-                                   "[value filter]"],
-                     "read": ["[value colorspace]"],
-                     "shuffle": ["[value in] > [value out]",
-                                 "[value in]",
-                                 "[value out]"],
-                     "shuffle2": ["[value in1] > [value out1]",
-                                  "[value in1]",
-                                  "[value in2]",
-                                  "[value out1]",
-                                  "[value out2]"],
-                     "roto": ["[value reference_frame]",
-                              "[value output]"],
-                     "switch": ["[value which]", "Input 1 after [value value_A]", "Input 0 before [value value_A]", "Input = [value error]"],
-                     "dissolve": ["[value which]"],
-                     "framehold": ["[value first_frame]"],
-                     "log": ["[value operation]"],
-                     "merge2": ["[value operation]",
-                                "[value bbox]",
-                                "[value mix]",
-                                "[knob tile_color [ expr { [value disable] ? 4278190335 : 0 } ] ]"],
-                     "channelmerge": ["[value operation]",
-                                      "[value bbox]",
-                                      "[value mix]"],
-                     "keymix": ["[value bbox]",
-                                "[value mix]"],
-                     "framerange": ["[value first_frame] - [value last_frame]"],
-                     "blur": ["[value size]"],
-                     "transform": ["[value translate]",
-                                   "[value rotate]",
-                                   "[value scale]",
-                                   "[value filter]"]
-    },
-
-    "icon_selection": ["none", "2D", "3D", "Axis", "Add", "Anaglyph", "Assert",
-                      "Bezier", "Camera",
-                      "Card", "ChannelMerge", "Color", "ColorAdd", "ColorBars", "ColorCorrect", "ColorLookup",
-                      "ClipTest", "ColorAdd", "ColorSpace", "CornerPin", "Crop", "Cube", "Color", "CheckerBoard",
-                      "ColorBars", "ColorCorrect", "Dot", "DegrainSimple",
-                      "EnvironMaps", "Exposure", "Expression",
-                      "HueShift", "FloodFill", "Input", "ImageModeler",
-                      "Keyer", "Keymix", "Light", "MarkerRemoval", "Merge", "Modify",
-                      "NukeXApp48", "Output", "OCIO",
-                      "Paint", "Particles", "Position", "PostageStamp", "Primatte",
-                      "Read", "Render", "RotoPaint",
-                      "Saturation", "Shuffle", "Sphere", "Sparkles", "SpotLight", "Scene", "Switch",
-                      "TimeClip", "Tracker", "Viewer", "Write"
-    ],
-
-    "_note_1_": "I added a letter + space before the key value to easily control the order of the items in the context menu",
-    "_note_2_": "The tool will always remove the first 2 characters of the key value to get the actual name of the item",
-
-    "disable_expressions": {
-        "a disable on GUI" : "$gui",
-        "b enable on GUI" : "!$gui",
-        "c clear expression" : null
-    },
-
-    "which_expressions": {
-        "switch": {"a input 0 on GUI": "!$gui",
-                   "b input 1 on GUI": "$gui",
-                   "c input 1 at frame": "frame == value_A",
-                   "d input 1 after frame": "frame > value_A",
-                   "e input 1 before frame": "frame < value_A",
-                   "f input 1 inbetween range": "inrange(frame, value_A, value_B)",
-                   "g input 0 when error input 1": "[value error]"
+    "tcl_expressions": {
+        "__NOTES__": {
+            "a": "I added a letter + space before the key value to easily control the order of the items in the context menu",
+            "b": "The tool will automatically remove the first 2 characters of the key value to get the actual name of the item"
         },
-
-        "dissolve": {"a fade in linear": "clamp( ( frame - value_A ) / ( value_B - value_A) )",
-                     "b fade in ease in-out": "smoothstep( value_A, value_B, frame )",
-                     "c fade in ease in": "pow( clamp( ( frame - value_A ) / ( value_B - value_A ), 0, 1) , 2 )",
-                     "d fade in ease out": "sin( clamp( ( ( frame - ( value_A * 2 - value_B ) ) * pi ) / ( ( value_B - value_A ) * 2 ) - pi / 2,0, pi / 2) )",
-                     "e fade out linear" : "clamp(1 - ((frame - value_A) / (value_B - value_A)), 0, 1)",
-                     "f fade out ease in-out" : "clamp(0.5 + 0.5 * cos((clamp((frame - value_A) / (value_B - value_A), 0, 1)) * 3.14159265), 0, 1)",
-                     "g fade out ease out" : "pow(clamp(1 - ((frame - value_A) / (value_B - value_A)), 0, 1), 2)",
-                     "h fade out ease in" : "sqrt(clamp(1 - ((frame - value_A) / (value_B - value_A)), 0, 1))",
-                     "i smooth 0-1 .. 1-0": "smoothstep(value_A, value_B, frame) * (1 - smoothstep(value_C, value_D, frame))",
-                     "j linear 0-1 .. 1-0": "clamp((frame - value_A) / (value_B - value_A), 0, 1) * clamp((value_D - frame) / (value_D - value_C), 0, 1)"
+        "switch": {
+            "f input 1 inbetween range": "inrange(frame, value_A, value_B)", 
+            "a input 0 on GUI": "!$gui", 
+            "g input 0 when error input 1": "[value error]", 
+            "c input 1 at frame": "frame == value_A", 
+            "b input 1 on GUI": "$gui", 
+            "e input 1 before frame": "frame < value_A", 
+            "d input 1 after frame": "frame > value_A"
+        }, 
+        "dissolve": {
+            "a fade in linear": "clamp( ( frame - value_A ) / ( value_B - value_A) )", 
+            "i smooth 0-1 .. 1-0": "smoothstep(value_A, value_B, frame) * (1 - smoothstep(value_C, value_D, frame))", 
+            "e fade out linear": "clamp(1 - ((frame - value_A) / (value_B - value_A)), 0, 1)", 
+            "c fade in ease in": "pow( clamp( ( frame - value_A ) / ( value_B - value_A ), 0, 1) , 2 )", 
+            "b fade in ease in-out": "smoothstep( value_A, value_B, frame )", 
+            "g fade out ease out": "pow(clamp(1 - ((frame - value_A) / (value_B - value_A)), 0, 1), 2)", 
+            "h fade out ease in": "sqrt(clamp(1 - ((frame - value_A) / (value_B - value_A)), 0, 1))", 
+            "j linear 0-1 .. 1-0": "clamp((frame - value_A) / (value_B - value_A), 0, 1) * clamp((value_D - frame) / (value_D - value_C), 0, 1)", 
+            "f fade out ease in-out": "clamp(0.5 + 0.5 * cos((clamp((frame - value_A) / (value_B - value_A), 0, 1)) * 3.14159265), 0, 1)", 
+            "d fade in ease out": "sin( clamp( ( ( frame - ( value_A * 2 - value_B ) ) * pi ) / ( ( value_B - value_A ) * 2 ) - pi / 2,0, pi / 2) )"
+        },
+        "disable": {
+            "b enable on GUI": "!$gui",
+            "a disable on GUI": "$gui",
+            "c clear expression": null
         }
-}}
+    }, 
+    "label_presets": {
+        "tracker4": [
+            "[value transform] : [value reference_frame]", 
+            "[value reference_frame]", 
+            "[value transform]", 
+            "[value filter]"
+        ], 
+        "keymix": [
+            "[value bbox]", 
+            "[value mix]"
+        ], 
+        "shuffle": [
+            "[value in] > [value out]", 
+            "[value in]", 
+            "[value out]"
+        ], 
+        "log": [
+            "[value operation]"
+        ], 
+        "dilate": [
+            "[value size]"
+        ], 
+        "read": [
+            "[value colorspace]"
+        ], 
+        "framehold": [
+            "[value first_frame]"
+        ], 
+        "transform": [
+            "[value translate]", 
+            "[value rotate]", 
+            "[value scale]", 
+            "[value filter]"
+        ], 
+        "timedissolve": [
+            "[value in]"
+        ], 
+        "channelmerge": [
+            "[value operation]", 
+            "[value bbox]", 
+            "[value mix]"
+        ], 
+        "write": [
+            "[value file]"
+        ], 
+        "merge2": [
+            "[value operation]", 
+            "[value bbox]", 
+            "[value mix]", 
+            "[knob tile_color [ expr { [value disable] ? 4278190335 : 0 } ] ]"
+        ], 
+        "switch": [
+            "[value which]", 
+            "Input 1 after [value value_A]", 
+            "Input 0 before [value value_A]", 
+            "Input = [value error]", 
+            "[if {[value which]==0} {return NOFX} {return FX ON}]\n[ knob tile_color [ expr {[ value which ]? 10289407 : 4278190335 } ] ]"
+        ], 
+        "shuffle2": [
+            "[value in1] > [value out1]", 
+            "[value in1]", 
+            "[value in2]", 
+            "[value out1]", 
+            "[value out2]"
+        ], 
+        "framerange": [
+            "[value first_frame] - [value last_frame]"
+        ], 
+        "roto": [
+            "[value reference_frame]", 
+            "[value output]"
+        ], 
+        "blur": [
+            "[value size]"
+        ], 
+        "dissolve": [
+            "[value which]", 
+            "[if {[value which]==0} {return NOFX} {return FX ON}][ knob tile_color [ expr {[ value which ]? 10289407 : 4278190335 } ] ]", 
+            "IN = [value value_A] - [value value_B]\n OUT = [value value_C] - [value value_D]", 
+            "[value input0.name]"
+        ]
+    }, 
+    "icon_selection": [
+        "none", 
+        "2D", 
+        "3D", 
+        "Axis", 
+        "Add", 
+        "Anaglyph", 
+        "Assert", 
+        "Bezier", 
+        "Camera", 
+        "Card", 
+        "ChannelMerge", 
+        "Color", 
+        "ColorAdd", 
+        "ColorBars", 
+        "ColorCorrect", 
+        "ColorLookup", 
+        "ClipTest", 
+        "ColorAdd", 
+        "ColorSpace", 
+        "CornerPin", 
+        "Crop", 
+        "Cube", 
+        "Color", 
+        "CheckerBoard", 
+        "ColorBars", 
+        "ColorCorrect", 
+        "Dot", 
+        "DegrainSimple", 
+        "EnvironMaps", 
+        "Exposure", 
+        "Expression", 
+        "HueShift", 
+        "FloodFill", 
+        "Input", 
+        "ImageModeler", 
+        "Keyer", 
+        "Keymix", 
+        "Light", 
+        "MarkerRemoval", 
+        "Merge", 
+        "Modify", 
+        "NukeXApp48", 
+        "Output", 
+        "OCIO", 
+        "Paint", 
+        "Particles", 
+        "Position", 
+        "PostageStamp", 
+        "Primatte", 
+        "Read", 
+        "Render", 
+        "RotoPaint", 
+        "Saturation", 
+        "Shuffle", 
+        "Sphere", 
+        "Sparkles", 
+        "SpotLight", 
+        "Scene", 
+        "Switch", 
+        "TimeClip", 
+        "Tracker", 
+        "Viewer", 
+        "Write"
+    ]
+}

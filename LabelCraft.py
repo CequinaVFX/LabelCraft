@@ -9,8 +9,8 @@ __author__ = 'Luciano Cequinel'
 __contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.0.26'
-__release_date__ = 'January, 09 2025'
+__version__ = '1.0.28'
+__release_date__ = 'May, 17 2025'
 __license__ = 'MIT'
 
 import re
@@ -23,6 +23,7 @@ from PySide2 import QtUiTools, QtCore, QtGui, QtWidgets
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QStyleFactory, QMenu
 
+nuke.tprint(__title__, __version__)
 
 # Global Functions
 def get_selection():
@@ -179,12 +180,12 @@ class LabelCraft:
         self.LabelCraftUI.setStyleSheet(qss_style_content)
 
         _json = os.path.join(package_path, 'LabelCraft_customizables.json')
-        data = get_json_data(json_file=_json)
+        self.data = get_json_data(json_file=_json)
 
-        self.label_presets = data['label_presets']
-        self.disable_expressions = data['disable_expressions']
-        self.which_expressions = data['which_expressions']
-        self.icon_selection = data['icon_selection']
+        self.label_presets = self.data.get('label_presets')
+        self.disable_expressions = self.data.get('tcl_expressions') # ['disable']
+        self.tcl_expressions = self.data.get('tcl_expressions')
+        self.icon_selection = self.data.get('icon_selection')
 
         # create Class attributes
         self.node = None
@@ -264,22 +265,55 @@ class LabelCraft:
         """
         Show the context menu for label presets.
         """
+        context_menu = QMenu(self.LabelCraftUI.edt_NodeLabel)
+
+        save_action = context_menu.addAction('save preset')
+        save_action.triggered.connect(self.save_preset)
+        context_menu.addSeparator()
+
         self.presets_label_knob = []
         if self.current_node_class in self.label_presets.keys():
             self.presets_label_knob = self.label_presets[self.current_node_class]
-
-            context_menu = QMenu(self.LabelCraftUI.edt_NodeLabel)
-
             # Add preset actions
             for preset in self.presets_label_knob:
                 action = context_menu.addAction(preset)
                 action.triggered.connect(lambda checked=False, p=preset: self.insert_preset_text(p))
 
-            # Show the context menu at the cursor position
-            p = QtCore.QPoint()
-            p.setX(QtGui.QCursor.pos().x())
-            p.setY(QtGui.QCursor.pos().y())
-            context_menu.exec_(p)
+        # Show the context menu at the cursor position
+        point = QtCore.QPoint()
+        point.setX(QtGui.QCursor.pos().x())
+        point.setY(QtGui.QCursor.pos().y())
+        context_menu.exec_(point)
+
+    def save_preset(self):
+        """
+        Save the current label as a preset.
+        """
+        cursor = self.LabelCraftUI.edt_NodeLabel.textCursor()
+        if cursor.hasSelection():
+            preset = cursor.selectedText()
+        else:
+            preset = self.LabelCraftUI.edt_NodeLabel.toPlainText()
+
+        if self.current_node_class in self.label_presets.keys():
+            if preset not in self.label_presets[self.current_node_class]:
+                print('Adding {} to {}'.format(preset, self.current_node_class))
+                self.label_presets[self.current_node_class].append(preset)
+
+                self.data['label_presets'] = self.label_presets
+
+                # Save the updated presets to the JSON file
+                with open(os.path.join(os.path.dirname(__file__), 'LabelCraft_customizables.json'), 'w') as f:
+                    json.dump(self.data, f, indent=4)
+
+        else:
+            print('Creating a new entry to {} node: {}'.format(self.current_node_class, preset))
+            self.label_presets[self.current_node_class] = [preset]
+            self.data['label_presets'] = self.label_presets
+
+            # Save the updated presets to the JSON file
+            with open(os.path.join(os.path.dirname(__file__), 'LabelCraft_customizables.json'), 'w') as f:
+                json.dump(self.data, f, indent=4)
 
     def insert_preset_text(self, preset_text):
         """
@@ -350,7 +384,6 @@ class LabelCraft:
 
         if 'color_group' in self.node.knobs():
             self.node['color_group'].setValue(str(new_color))
-
 
     # Common Knobs (HideInput, PostageStamp, Bookmark, Disable)
     def common_knobs(self, node):
@@ -434,7 +467,7 @@ class LabelCraft:
         """
         Show the context menu for disable knob.
         """
-        self.presets_disable_knob = self.disable_expressions
+        self.presets_disable_knob = self.tcl_expressions.get('disable')
 
         context_menu = QMenu(self.LabelCraftUI.ckx_Disable)
 
@@ -803,6 +836,9 @@ class LabelCraft:
         clip_state = self.node['cliptype'].value()
         self.LabelCraftUI.cbx_RotoCliptype.setCurrentText(clip_state)
 
+        clip_replace = self.node['replace'].value()
+        self.LabelCraftUI.ckx_RotoReplace.setChecked(clip_replace)
+
         # set signals
         self.LabelCraftUI.cbx_RotoOutput.currentTextChanged.connect(self.change_output)
         self.LabelCraftUI.cbx_RotoPremult.currentTextChanged.connect(self.change_premult)
@@ -892,7 +928,7 @@ class LabelCraft:
         """
         Show the context menu for expression presets.
         """
-        self.presets_which_knob = self.which_expressions[self.current_node_class]
+        self.presets_which_knob = self.tcl_expressions.get(self.current_node_class)
 
         context_menu = QMenu(self.LabelCraftUI.edt_SwitchWhich)
 
@@ -1192,10 +1228,30 @@ class LabelCraft:
         # Re-position, resize and show floating Widget Window
         self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint |
                                          QtCore.Qt.Popup)
+        self.LabelCraftUI.adjustSize()
 
-        # Re-position UI under mouse cursor
-        self.LabelCraftUI.move(QtGui.QCursor.pos().x() - int(self.LabelCraftUI.width() / 2),
-                               QtGui.QCursor.pos().y())
+        # Get screen geometry + mouse pointer position
+        screen_geometry = QtWidgets.QApplication.desktop().availableGeometry()
+        cursor_pos = QtGui.QCursor.pos()
+        window_width = self.LabelCraftUI.width()
+        window_height = self.LabelCraftUI.height()
+
+        # Calculate x position (prevent going off left or right side)
+        x = cursor_pos.x() # - int(window_width / 2)
+        if x + window_width > screen_geometry.right():
+            x = screen_geometry.right() - window_width
+        elif x - int(window_width / 2) < screen_geometry.left():
+            x = screen_geometry.left()
+        else:
+            x = x - int(window_width / 2)
+
+        # Calculate y position (prevent going off bottom)
+        y = cursor_pos.y()
+        if y + window_height > screen_geometry.bottom():
+            y = screen_geometry.bottom() - window_height
+
+        # Move window to calculated position
+        self.LabelCraftUI.move(x, y)
 
         # Set Focus to the Label Box
         self.LabelCraftUI.edt_NodeLabel.setFocusPolicy(Qt.StrongFocus)

@@ -3,6 +3,14 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.0.30] - 2025-05-17
++ NEW Save label preset to the current node
++ FIX prevent UI from going off-screen when cursor is near edge
++ FIX ensure Replace knob state is correctly set (Roto/RotoPaint nodes)
+
+## [1.0.27] - 2025-01-09
++ NEW label preset for Switch node
+
 ## [1.0.26] - 2025-01-09
 + FIX regex expression to return the correct label for StickyNote and Backdrop
 
@@ -31,7 +39,7 @@
 + REMOVE methods that wasn't in use (Text Class, Colorspace Class)
 
 ## [1.0.19] - 2024-12-30
-+ FIX some variables and PIP8 standardarization
++ FIX some variables and PIP8 standardization
 
 ## [1.0.18] - 2024-12-20
 + NEW css stylesheet

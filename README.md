@@ -18,19 +18,19 @@ A detailed guide on how to use LabelCraft is available at [CequinaVFX's blog](ht
 - **Operating System:** Windows, macOS, or Linux.
 
 ## Installation
-1. **Download the repository** from https://github.com/CequinaVFX/LabelCraft.
-2. **OR Clone the repository**:
+1. **Download the most recent [release](https://github.com/CequinaVFX/LabelCraft/releases)**
+2. **OR Download the [repository]( https://github.com/CequinaVFX/LabelCraft)**
+3. **OR Clone the repository**:
    ```bash
    git clone https://github.com/CequinaVFX/LabelCraft.git
    ```
-3. Unzip and rename the folder to `LabelCraft`
-4. Copy the folder to .nuke standard folder.
-5. Add these line to init.py (`create a new one if it doesn't exist`):
+4. Unzip and rename the folder to `LabelCraft`
+5. Copy the folder to [.nuke standard folder](https://learn.foundry.com/nuke/12.2/content/user_guide/configuring_nuke/finding_nuke_home.html)
+6. Add these line to init.py (`create a new one if it doesn't exist`):
    ```python
    import nuke 
    nuke.pluginAddPath('./LabelCraft')
    ```
-[Where to find the .nuke folder](https://learn.foundry.com/nuke/12.2/content/user_guide/configuring_nuke/finding_nuke_home.html)
 
 ## License
 This project is licensed under the MIT License.
