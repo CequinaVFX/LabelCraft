@@ -6,22 +6,26 @@ Tracker, and more.
 
 __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
-__contact__ = 'lucianocequinel@gmail.com'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.0.28'
-__release_date__ = 'May, 17 2025'
+__version__ = '1.3.0'
+__release_date__ = 'Dez, 22 2025'
 __license__ = 'MIT'
 
 import re
-import nuke
 import json
 import random
 import os.path
 
-from PySide2 import QtUiTools, QtCore, QtGui, QtWidgets
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QStyleFactory, QMenu
+import nuke
+
+from Qt import QtCore, QtGui, QtWidgets, QtCompat
+from Qt.QtCore import Qt
+from Qt.QtWidgets import QStyleFactory, QMenu
+
+# from PySide2 import QtUiTools, QtCore, QtGui, QtWidgets
+# from PySide2.QtCore import Qt
+# from PySide2.QtWidgets import QStyleFactory, QMenu
 
 nuke.tprint(__title__, __version__)
 
@@ -55,10 +59,10 @@ def get_json_data(json_file):
     Returns:
         dict: Parsed JSON data or None.
     """
-    with open(json_file, "r") as file:
-        data = json.load(file)
+    if os.path.exists(json_file):
+        with open(json_file, "r") as file:
+            data = json.load(file)
 
-    if data:
         return data
 
     return None
@@ -169,7 +173,9 @@ class LabelCraft:
         package_path = os.path.dirname(__file__)
         ui_path = os.path.join(package_path, '{}.ui'.format(__title__))
 
-        self.LabelCraftUI = QtUiTools.QUiLoader().load(ui_path)
+        # self.LabelCraftUI = QtUiTools.QUiLoader().load(ui_path)
+        self.LabelCraftUI = QtCompat.loadUi(ui_path)
+
         self.LabelCraftUI.setWindowTitle(__title__)
         self.LabelCraftUI.setStyle(QStyleFactory.create('Fusion'))
 
@@ -179,11 +185,11 @@ class LabelCraft:
 
         self.LabelCraftUI.setStyleSheet(qss_style_content)
 
-        _json = os.path.join(package_path, 'LabelCraft_customizables.json')
-        self.data = get_json_data(json_file=_json)
+        self.custom_db = os.path.join(package_path, 'LabelCraft_customizables.json')
+        self.data = get_json_data(json_file=self.custom_db)
 
         self.label_presets = self.data.get('label_presets')
-        self.disable_expressions = self.data.get('tcl_expressions') # ['disable']
+        self.disable_expressions = self.data.get('tcl_expressions')
         self.tcl_expressions = self.data.get('tcl_expressions')
         self.icon_selection = self.data.get('icon_selection')
 
@@ -207,7 +213,7 @@ class LabelCraft:
         """
 
         _credits = ('<font size=2 color=slategrey>'
-                    '<a href="{}" style="color:#ff4242;">Label Craft</a> v {}'
+                    '<a href="{}" style="color:#ff4242;">Label Craft</a> v{}'
                     ' - created by <a href="{}"style="color:#ff4242;">{}</a>').format(__website_blog__,
                                                                                       __version__,
                                                                                       __website__,
@@ -285,7 +291,7 @@ class LabelCraft:
         point.setY(QtGui.QCursor.pos().y())
         context_menu.exec_(point)
 
-    def save_preset(self):
+    def save_preset_bkp(self):
         """
         Save the current label as a preset.
         """
@@ -314,6 +320,46 @@ class LabelCraft:
             # Save the updated presets to the JSON file
             with open(os.path.join(os.path.dirname(__file__), 'LabelCraft_customizables.json'), 'w') as f:
                 json.dump(self.data, f, indent=4)
+
+    def save_preset(self):
+        """
+        Save the current label as a preset.
+        """
+        def _save_db():
+            with open(self.custom_db, 'w') as f:
+                json.dump(self.data, f, indent=4)
+
+        preset = self.LabelCraftUI.edt_NodeLabel.toPlainText()
+        cursor = self.LabelCraftUI.edt_NodeLabel.textCursor()
+
+        if any([preset == '', preset is None, preset.isspace()]):
+            return
+        elif cursor.hasSelection():
+            preset = cursor.selectedText()
+        # else:
+        #     preset = self.LabelCraftUI.edt_NodeLabel.toPlainText()
+        # self.custom_db = os.path.join(os.path.dirname(__file__), 'LabelCraft_customizables.json'
+
+        if self.current_node_class in self.label_presets.keys():
+            if preset not in self.label_presets[self.current_node_class]:
+                print('Adding {} to {}'.format(preset, self.current_node_class))
+                self.label_presets[self.current_node_class].append(preset)
+                self.data['label_presets'] = self.label_presets
+
+                # Save the updated presets to the JSON file
+                _save_db()
+                # with open(self.custom_db, 'w') as f:
+                #     json.dump(self.data, f, indent=4)
+
+        else:
+            print('Creating a new entry to {} node: {}'.format(self.current_node_class, preset))
+            self.label_presets[self.current_node_class] = [preset]
+            self.data['label_presets'] = self.label_presets
+
+            # Save the updated presets to the JSON file
+            _save_db()
+            # with open(self.custom_db, 'w') as f:
+            #     json.dump(self.data, f, indent=4)
 
     def insert_preset_text(self, preset_text):
         """
@@ -1228,7 +1274,6 @@ class LabelCraft:
         # Re-position, resize and show floating Widget Window
         self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint |
                                          QtCore.Qt.Popup)
-        self.LabelCraftUI.adjustSize()
 
         # Get screen geometry + mouse pointer position
         screen_geometry = QtWidgets.QApplication.desktop().availableGeometry()
