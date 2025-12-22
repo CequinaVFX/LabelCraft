@@ -3,6 +3,10 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.3.0] - 2025-12-22
++ CHANGE to qt.py for Nuke 16+ compatibility
++ FIX Save Preset to ignore empty saving
+
 ## [1.0.30] - 2025-05-17
 + NEW Save label preset to the current node
 + FIX prevent UI from going off-screen when cursor is near edge
