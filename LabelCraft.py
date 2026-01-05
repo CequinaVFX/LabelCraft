@@ -8,8 +8,8 @@ __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.3.0'
-__release_date__ = 'Dez, 22 2025'
+__version__ = '1.3.1'
+__release_date__ = 'Jan, 05 2026'
 __license__ = 'MIT'
 
 import re
