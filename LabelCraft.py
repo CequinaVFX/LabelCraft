@@ -20,12 +20,14 @@ import os.path
 import nuke
 
 from Qt import QtCore, QtGui, QtWidgets, QtCompat
-from Qt.QtCore import Qt
+from Qt.QtCore import Qt, QUrl
 from Qt.QtWidgets import QStyleFactory, QMenu
 
-# from PySide2 import QtUiTools, QtCore, QtGui, QtWidgets
-# from PySide2.QtCore import Qt
-# from PySide2.QtWidgets import QStyleFactory, QMenu
+
+# if nuke.NUKE_VERSION_MAJOR >= 16:
+#     from PySide6.QtGui import QDesktopServices
+# else:
+#     from PySide2.QtGui import QDesktopServices
 
 nuke.tprint(__title__, __version__)
 
@@ -211,23 +213,33 @@ class LabelCraft:
         """
         Set up UI components and default visibility.
         """
+        self.LabelCraftUI.btn_guide.clicked.connect(self.open_guide)
 
-        _credits = ('<font size=2 color=slategrey>'
-                    '<a href="{}" style="color:#ff4242;">Label Craft</a> v{}'
-                    ' - created by <a href="{}"style="color:#ff4242;">{}</a>').format(__website_blog__,
-                                                                                      __version__,
-                                                                                      __website__,
-                                                                                      __author__)
+        # _credits = ('<font size=2 color=slategrey>'
+        #             '<a href="{}" style="color:#ff4242;">Label Craft</a> v{}'
+        #             ' - created by <a href="{}"style="color:#ff4242;">{}</a>').format(__website_blog__,
+        #                                                                               __version__,
+        #                                                                               __website__,
+        #                                                                               __author__)
+
+        _credits = '<font size=2 color=slategrey> Label Craft v{} - created by {}</font>'.format(__version__,
+                                                                                                 __author__)
 
         self.LabelCraftUI.lbl_credits.setText(_credits)
-        self.LabelCraftUI.lbl_credits.setOpenExternalLinks(True)
-        self.LabelCraftUI.lbl_credits.setTextInteractionFlags(self.LabelCraftUI.lbl_credits.textInteractionFlags() |
-                                                              self.LabelCraftUI.lbl_credits.openExternalLinks())
+        # self.LabelCraftUI.lbl_credits.setOpenExternalLinks(True)
+        # self.LabelCraftUI.lbl_credits.setTextInteractionFlags(self.LabelCraftUI.lbl_credits.textInteractionFlags() |
+        #                                                       self.LabelCraftUI.lbl_credits.openExternalLinks())
 
         # Loop through all groups to make them invisible
         for child in self.LabelCraftUI.findChildren(QtWidgets.QWidget):
             if child.objectName().startswith('grp_'):
                 child.setVisible(False)
+
+    # Open guide
+    def open_guide(self):
+        import webbrowser
+        webbrowser.open(__website_blog__)
+        # QDesktopServices.openUrl(QUrl(__website_blog__))
 
     # Label Knob
     def label_knob(self, node):

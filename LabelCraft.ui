@@ -403,7 +403,7 @@ color: rgb(213, 213, 213);</string>
               <number>1</number>
              </property>
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
             </widget>
            </item>
@@ -531,13 +531,13 @@ color: rgb(213, 213, 213);</string>
            <item row="1" column="2">
             <widget class="QLabel" name="lbl_InfoIcon">
              <property name="layoutDirection">
-              <enum>Qt::LeftToRight</enum>
+              <enum>Qt::LayoutDirection::LeftToRight</enum>
              </property>
              <property name="text">
               <string>icon</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
              <property name="buddy">
               <cstring>cbx_InfoIcon</cstring>
@@ -586,7 +586,7 @@ color: rgb(213, 213, 213);</string>
               <string>set filter size for Filter nodes</string>
              </property>
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
             </widget>
            </item>
@@ -623,7 +623,7 @@ color: rgb(213, 213, 213);</string>
               <string>set filter size for Filter nodes</string>
              </property>
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
             </widget>
            </item>
@@ -676,7 +676,7 @@ color: rgb(213, 213, 213);</string>
               <string>value A</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
              <property name="buddy">
               <cstring>spn_Switch_value_A</cstring>
@@ -696,7 +696,7 @@ color: rgb(213, 213, 213);</string>
               <string>value B</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
              <property name="buddy">
               <cstring>spn_Switch_value_B</cstring>
@@ -729,7 +729,7 @@ color: rgb(213, 213, 213);</string>
               <string>value C</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -739,7 +739,7 @@ color: rgb(213, 213, 213);</string>
               <string>value D</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -825,16 +825,12 @@ set in colorspace for OCIOColorspace and Colorspace</string>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horlay_credits">
-       <property name="topMargin">
-        <number>10</number>
-       </property>
        <item>
         <widget class="QLabel" name="lbl_credits">
          <property name="font">
           <font>
            <family>MS Shell Dlg 2</family>
            <pointsize>6</pointsize>
-           <weight>50</weight>
            <italic>false</italic>
            <bold>false</bold>
           </font>
@@ -843,7 +839,25 @@ set in colorspace for OCIOColorspace and Colorspace</string>
           <string>credits</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_guide">
+         <property name="maximumSize">
+          <size>
+           <width>86</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>8</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Guide</string>
          </property>
         </widget>
        </item>
