@@ -3,6 +3,10 @@
 
 [comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
 
+## [1.3.1] - 2026-01-12
++ FIX PySide6 conflicts
++ FIX QLabel weblink
+
 ## [1.3.0] - 2025-12-22
 + CHANGE to qt.py for Nuke 16+ compatibility
 + FIX Save Preset to ignore empty saving
