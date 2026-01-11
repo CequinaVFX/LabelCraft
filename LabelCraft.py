@@ -8,8 +8,8 @@ __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.3.0'
-__release_date__ = 'Dez, 22 2025'
+__version__ = '1.3.1'
+__release_date__ = 'Jan, 12 2026'
 __license__ = 'MIT'
 
 import re
@@ -29,7 +29,7 @@ from Qt.QtWidgets import QStyleFactory, QMenu
 # else:
 #     from PySide2.QtGui import QDesktopServices
 
-nuke.tprint(__title__, __version__)
+nuke.tprint('\n\t\t', __title__, __version__, '\n')
 
 # Global Functions
 def get_selection():
@@ -1231,6 +1231,45 @@ class LabelCraft:
         """
         self.node['projection_mode'].setValue(str(command))
 
+    @staticmethod
+    def smart_position_window(dialog):
+        """Position dialog under the cursor"""
+        cursor_pos = QtGui.QCursor.pos()
+
+        app = QtWidgets.QApplication.instance()
+
+        if hasattr(app, 'desktop'):
+            desktop = app.desktop()
+            screen_num = desktop.screenNumber(cursor_pos)
+            screen_rect = desktop.availableGeometry(screen_num)
+        else:
+            target_screen = None
+            for screen in app.screens():
+                if screen.geometry().contains(cursor_pos):
+                    screen_rect = screen.availableGeometry()
+                    break
+            else:
+                screen_rect = app.primaryScreen().availableGeometry()
+
+        dialog_width = dialog.width()
+        dialog_height = dialog.height()
+
+        if dialog_height > screen_rect.height() * 0.7:
+            y = cursor_pos.y() - dialog_height - 10
+        else:
+            y = cursor_pos.y() + 20
+            if y + dialog_height > screen_rect.bottom():
+                y = cursor_pos.y() - dialog_height - 10
+
+        # Center horizontally
+        x = cursor_pos.x() - (dialog_width // 2)
+
+        # Ensure it stays on screen
+        x = max(screen_rect.left(), min(x, screen_rect.right() - dialog_width))
+        y = max(screen_rect.top(), min(y, screen_rect.bottom() - dialog_height))
+
+        dialog.move(int(x), int(y))
+
     # Main Function that calls the corresponding Class
     def edit_node(self):
         """
@@ -1283,39 +1322,17 @@ class LabelCraft:
             self.current_node_class = self.node.Class().lower()
             self.scanline_class()
 
-        # Re-position, resize and show floating Widget Window
+        # Resize to its contents, and re-position under the mouse
         self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint |
                                          QtCore.Qt.Popup)
 
-        # Get screen geometry + mouse pointer position
-        screen_geometry = QtWidgets.QApplication.desktop().availableGeometry()
-        cursor_pos = QtGui.QCursor.pos()
-        window_width = self.LabelCraftUI.width()
-        window_height = self.LabelCraftUI.height()
-
-        # Calculate x position (prevent going off left or right side)
-        x = cursor_pos.x() # - int(window_width / 2)
-        if x + window_width > screen_geometry.right():
-            x = screen_geometry.right() - window_width
-        elif x - int(window_width / 2) < screen_geometry.left():
-            x = screen_geometry.left()
-        else:
-            x = x - int(window_width / 2)
-
-        # Calculate y position (prevent going off bottom)
-        y = cursor_pos.y()
-        if y + window_height > screen_geometry.bottom():
-            y = screen_geometry.bottom() - window_height
-
-        # Move window to calculated position
-        self.LabelCraftUI.move(x, y)
+        self.LabelCraftUI.adjustSize()
+        self.smart_position_window(self.LabelCraftUI)
 
         # Set Focus to the Label Box
         self.LabelCraftUI.edt_NodeLabel.setFocusPolicy(Qt.StrongFocus)
         self.LabelCraftUI.edt_NodeLabel.setFocus()
 
-        # Resize to its contents
-        self.LabelCraftUI.adjustSize()
         self.LabelCraftUI.show()
 
 
