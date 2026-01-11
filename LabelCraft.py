@@ -23,12 +23,6 @@ from Qt import QtCore, QtGui, QtWidgets, QtCompat
 from Qt.QtCore import Qt, QUrl
 from Qt.QtWidgets import QStyleFactory, QMenu
 
-
-# if nuke.NUKE_VERSION_MAJOR >= 16:
-#     from PySide6.QtGui import QDesktopServices
-# else:
-#     from PySide2.QtGui import QDesktopServices
-
 nuke.tprint('\n\t\t', __title__, __version__, '\n')
 
 # Global Functions
@@ -215,20 +209,10 @@ class LabelCraft:
         """
         self.LabelCraftUI.btn_guide.clicked.connect(self.open_guide)
 
-        # _credits = ('<font size=2 color=slategrey>'
-        #             '<a href="{}" style="color:#ff4242;">Label Craft</a> v{}'
-        #             ' - created by <a href="{}"style="color:#ff4242;">{}</a>').format(__website_blog__,
-        #                                                                               __version__,
-        #                                                                               __website__,
-        #                                                                               __author__)
-
         _credits = '<font size=2 color=slategrey> Label Craft v{} - created by {}</font>'.format(__version__,
                                                                                                  __author__)
 
         self.LabelCraftUI.lbl_credits.setText(_credits)
-        # self.LabelCraftUI.lbl_credits.setOpenExternalLinks(True)
-        # self.LabelCraftUI.lbl_credits.setTextInteractionFlags(self.LabelCraftUI.lbl_credits.textInteractionFlags() |
-        #                                                       self.LabelCraftUI.lbl_credits.openExternalLinks())
 
         # Loop through all groups to make them invisible
         for child in self.LabelCraftUI.findChildren(QtWidgets.QWidget):
@@ -239,7 +223,6 @@ class LabelCraft:
     def open_guide(self):
         import webbrowser
         webbrowser.open(__website_blog__)
-        # QDesktopServices.openUrl(QUrl(__website_blog__))
 
     # Label Knob
     def label_knob(self, node):
@@ -348,9 +331,6 @@ class LabelCraft:
             return
         elif cursor.hasSelection():
             preset = cursor.selectedText()
-        # else:
-        #     preset = self.LabelCraftUI.edt_NodeLabel.toPlainText()
-        # self.custom_db = os.path.join(os.path.dirname(__file__), 'LabelCraft_customizables.json'
 
         if self.current_node_class in self.label_presets.keys():
             if preset not in self.label_presets[self.current_node_class]:
@@ -360,8 +340,6 @@ class LabelCraft:
 
                 # Save the updated presets to the JSON file
                 _save_db()
-                # with open(self.custom_db, 'w') as f:
-                #     json.dump(self.data, f, indent=4)
 
         else:
             print('Creating a new entry to {} node: {}'.format(self.current_node_class, preset))
@@ -370,8 +348,6 @@ class LabelCraft:
 
             # Save the updated presets to the JSON file
             _save_db()
-            # with open(self.custom_db, 'w') as f:
-            #     json.dump(self.data, f, indent=4)
 
     def insert_preset_text(self, preset_text):
         """
@@ -742,8 +718,6 @@ class LabelCraft:
             except Exception as error:
                 print(error)
                 continue
-
-        # return trackers
 
     def change_reference(self):
         """
