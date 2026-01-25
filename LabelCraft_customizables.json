@@ -1,9 +1,14 @@
 {
     "tcl_expressions": {
         "__NOTES__": {
-            "a": "I added a letter + space before the key value to easily control the order of the items in the context menu",
+            "a": "I added a letter + space before the key value to easily control the order of the items in the context menu", 
             "b": "The tool will automatically remove the first 2 characters of the key value to get the actual name of the item"
-        },
+        }, 
+        "disable": {
+            "b enable on GUI": "!$gui", 
+            "a disable on GUI": "$gui", 
+            "c clear expression": null
+        }, 
         "switch": {
             "f input 1 inbetween range": "inrange(frame, value_A, value_B)", 
             "a input 0 on GUI": "!$gui", 
@@ -24,11 +29,6 @@
             "j linear 0-1 .. 1-0": "clamp((frame - value_A) / (value_B - value_A), 0, 1) * clamp((value_D - frame) / (value_D - value_C), 0, 1)", 
             "f fade out ease in-out": "clamp(0.5 + 0.5 * cos((clamp((frame - value_A) / (value_B - value_A), 0, 1)) * 3.14159265), 0, 1)", 
             "d fade in ease out": "sin( clamp( ( ( frame - ( value_A * 2 - value_B ) ) * pi ) / ( ( value_B - value_A ) * 2 ) - pi / 2,0, pi / 2) )"
-        },
-        "disable": {
-            "b enable on GUI": "!$gui",
-            "a disable on GUI": "$gui",
-            "c clear expression": null
         }
     }, 
     "label_presets": {
@@ -50,6 +50,7 @@
         "log": [
             "[value operation]"
         ], 
+        "backdropnode": [], 
         "dilate": [
             "[value size]"
         ], 
@@ -105,6 +106,9 @@
         ], 
         "blur": [
             "[value size]"
+        ], 
+        "grade": [
+            "[value white]"
         ], 
         "dissolve": [
             "[value which]", 

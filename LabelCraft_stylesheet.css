@@ -42,4 +42,21 @@ QCheckBox::indicator:unchecked {
     background: rgb(30, 30, 30);
 }
 
+#btn_guide {
+    font: 8pt;
+    color: rgb(255, 66, 66);
+    border: none;
+}
+#btn_guide:hover {
+    font: 8pt;
+    background: rgb(255, 66, 66);
+    color: white;
+    border: none;
+}
+#lbl_credits {
+    font: 6pt;
+    color: rgb(255, 66, 66);
+    padding-left: 2px;
+}
+
 

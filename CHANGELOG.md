@@ -1,7 +1,16 @@
 # Label Craft
 ## Change Log
 
-[comment]: <>  (2024-12-10 : YEAR-MONTH-DAY)
+[comment]: <>  (2026-12-10 : YEAR-MONTH-DAY)
+
+## [1.4.0] - 2026-01-25
++ FIX Colorspace list for node with this knob type
++ NEW Delete preset functionality 
++ NEW HTML parser for more reliable label rendering
++ ADD OCIOColorspace and Colorspace node operations
++ ADD OCIOLogConvert and Log2Lin node operations
++ ADD FrameHold, FrameRange, TimeOffset and FrameBlend node operations
++ UPDATE UI tab order
 
 ## [1.3.1] - 2026-01-12
 + FIX PySide6 conflicts

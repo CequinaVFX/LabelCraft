@@ -1,15 +1,13 @@
 """
-LabelCraft is a tool for managing and editing labels in Nuke nodes. It provides a user interface for customizing
-node labels, colors, and other properties. The tool supports various node types, including Read, Shuffle, Merge, Roto,
-Tracker, and more.
+LabelCraft is a Nuke tool for editing and customizing node labels and knobs for any given node.
 """
 
 __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.3.1'
-__release_date__ = 'Jan, 12 2026'
+__version__ = '1.4.0'
+__release_date__ = 'Jan, 25 2026'
 __license__ = 'MIT'
 
 import re
@@ -20,10 +18,10 @@ import os.path
 import nuke
 
 from Qt import QtCore, QtGui, QtWidgets, QtCompat
-from Qt.QtCore import Qt, QUrl
-from Qt.QtWidgets import QStyleFactory, QMenu
+from Qt.QtCore import Qt, QUrl, Signal, QObject
+from Qt.QtWidgets import QStyleFactory, QMenu, QAction
 
-nuke.tprint('\n\t\t', __title__, __version__, '\n')
+nuke.tprint('\n\t', __title__, __version__, '\n')
 
 # Global Functions
 def get_selection():
@@ -61,72 +59,7 @@ def get_json_data(json_file):
 
         return data
 
-    return None
-
-
-def extract_html_tags(html_tags):
-    """
-    Parse HTML tags to extract alignment, bold, italic, and icon attributes.
-
-    Args:
-        html_tags (str): A string containing HTML tags.
-
-    Returns:
-        dict: A dictionary with keys 'align', 'bold', 'italic', and 'icon'
-              representing the parsed attributes.
-    """
-    align_pattern = r'(<p align=\"(?P<align>left|center|right)\">)'
-    bold_pattern = r'(?P<bold><b>)'
-    italic_pattern = r'(?P<italic><i>)'
-    icon_pattern = r'(src ?= ?\"(?P<icon>.*?).png\")'
-
-    # Set standard values to use them if the equivalent is not found in the string
-    align = 'center'
-    icon = "none"
-
-    align_search = re.search(align_pattern, html_tags)
-    if align_search:
-        align = align_search.group('align')
-
-    bold_search = re.search(bold_pattern, html_tags)
-    bold = bool(bold_search)
-
-    italic_search = re.search(italic_pattern, html_tags)
-    italic = bool(italic_search)
-
-    icon_search = re.search(icon_pattern, html_tags)
-    if icon_search:
-        icon = icon_search.group('icon')
-
-    return {'align': align,
-            'bold': bold,
-            'italic': italic,
-            'icon': icon}
-
-
-def split_label(current_label):
-    """
-    Split the current label into HTML tags and label text.
-
-    Args:
-        current_label (str): The current label string.
-
-    Returns:
-        tuple: A tuple containing a dictionary of HTML tags and the label text.
-    """
-    html_pattern = r"(?P<HTML>\<.*\>)(?P<label>.*)"
-    html_search = re.search(html_pattern, current_label, re.DOTALL)
-    if html_search:
-        html_tags = extract_html_tags(html_search.group('HTML'))
-        return html_tags, html_search.group('label')
-
-    else:
-        print('no html')
-        return ({'align': 'center',
-                 'bold': True,
-                 'italic': True,
-                 'icon': "none"},
-                current_label)
+    return {}
 
 
 def get_layers(node):
@@ -150,11 +83,213 @@ def generate_random_color():
     Returns:
         int: The generated color in hexadecimal format.
     """
-    color_range = (0.1, 0.8)
+    color_range = (0.02, 0.7)
     red = random.uniform(color_range[0], color_range[1])
     green = random.uniform(color_range[0], color_range[1])
     blue = random.uniform(color_range[0], color_range[1])
     return int('{:02x}{:02x}{:02x}ff'.format(int(red * 255), int(green * 255), int(blue * 255)), 16)
+
+
+def get_html_tags(tags):
+    """
+    Extract tags.
+
+    Returns:
+        dict of tags
+    """
+    style = {
+        'align': 'center',
+        'bold': False,
+        'italic': False,
+        'icon': 'none'
+    }
+
+    open_tags = []
+
+    for tag in tags:
+        tag_type = tag.get('type', '')
+
+        if tag.get('closing'):
+            if open_tags and open_tags[-1] == tag_type:
+                open_tags.pop()
+        else:
+            open_tags.append(tag_type)
+
+            if 'b' in open_tags:
+                style['bold'] = True
+            if 'i' in open_tags:
+                style['italic'] = True
+
+            if tag_type == 'img' and 'src' in tag:
+                src = tag['src']
+                name = os.path.splitext(os.path.basename(src))[0]
+                style['icon'] = name
+
+            if 'align' in tag:
+                style['align'] = tag['align']
+            elif tag_type in ['center', 'left', 'right']:
+                style['align'] = tag_type
+
+    return {k: v for k, v in style.items()}
+
+
+def html_handler(text):
+    """
+    Check if the string has HTML tags and separate them
+
+    Returns:
+        html_tags (dict)
+        cleaned string (str)
+    """
+
+    tag_pattern = r'<(\/?)([a-zA-Z][a-zA-Z0-9]*)([^>]*)>'
+
+    tags = []
+    plain_text = ""
+
+    pos = 0
+    while pos < len(text):
+        match = re.search(tag_pattern, text[pos:])
+
+        if match:
+            tag_start = match.start()
+            if tag_start > 0:
+                plain_text += text[pos:pos + tag_start]
+
+            is_closing = match.group(1) == '/'
+            tag_name = match.group(2).lower()
+            attrs_text = match.group(3).strip()
+
+            attrs = {}
+            if attrs_text:
+                attr_pattern = r'([a-zA-Z_][a-zA-Z0-9_-]*)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s/>]+))'
+                for attr_match in re.finditer(attr_pattern, attrs_text):
+                    key = attr_match.group(1).lower()
+                    value = attr_match.group(2) or attr_match.group(3) or attr_match.group(4) or ""
+                    attrs[key] = value
+
+            if is_closing:
+                tags.append({'type': tag_name, 'closing': True})
+            else:
+                tags.append(dict({'type': tag_name}, **attrs))
+
+            pos += match.end()
+        else:
+            plain_text += text[pos:]
+            break
+
+    check_tags = get_html_tags(tags)
+
+    return check_tags, plain_text
+
+
+class ColorspaceCascadingMenu(QObject, object):
+    """
+    Create a menu for a given QPushButton, handling weird strings and tab special characters.
+    It will create a fake ComboBox/ Dropdown menu with sub-items, similar to Cascading's Nuke menu.
+    """
+    itemSelected = Signal(str, str)
+
+    def __init__(self, button, button_name=None):
+        """
+        Initialize with an existing QPushButton
+
+        Args:
+            button: Existing QPushButton to attach menu to
+        """
+        QObject.__init__(self)
+        self.button = button
+        self.button.setObjectName(button_name)
+        self._menu = None
+        self._entries = []
+
+        self.button.clicked.connect(self.show_menu)
+
+    def set_entries(self, entries):
+        """Set the list of entries (can contain both hierarchical and flat items)"""
+        self._entries = entries
+
+    def show_menu(self):
+        """Show the cascading menu"""
+        if not self._entries:
+            return
+
+        self._menu = self.create_menu()
+        self._menu.exec_(self.button.mapToGlobal(self.button.rect().bottomLeft()))
+
+    def build_entry_tree(self):
+        """
+        Build a hierarchical tree from entries.
+
+        Supports:
+        - '/' for hierarchy
+        - '\\t' for description (ignored for hierarchy)
+
+        Returns:
+            dict representing a tree structure
+        """
+        tree = {}
+
+        for raw in self._entries:
+            if not raw:
+                continue
+
+            # Handle tab separator
+            if '\t' in raw:
+                entry, _desc = raw.split('\t', 1)
+            else:
+                entry = raw
+
+            entry = entry.strip()
+            parts = [p.strip() for p in entry.split('/')]
+
+            node = tree
+            for part in parts[:-1]:
+                node = node.setdefault(part, {})
+
+            # Leaf node
+            node[parts[-1]] = entry
+
+        return tree
+
+    def add_tree_to_menu(self, menu, tree, callback):
+        """
+        Recursively add tree items to a QMenu.
+        """
+        for label in sorted(tree.keys()):
+            if 'default' in label.lower():
+                continue
+
+            value = tree[label]
+
+            if isinstance(value, dict):
+                submenu = QMenu(label, menu)
+                menu.addMenu(submenu)
+                self.add_tree_to_menu(submenu, value, callback)
+            else:
+                action = QAction(label, menu)
+                action.triggered.connect(
+                    lambda e=value, n=self.button.objectName(): callback(e, n)
+                )
+                menu.addAction(action)
+
+    def create_menu(self):
+        """Create hierarchical menu from entries, supporting '/' and '\\t' separators"""
+        menu = QMenu(self.button)
+
+        tree = self.build_entry_tree()
+        self.add_tree_to_menu(menu, tree, self._emit_colorspace_selection)
+
+        return menu
+
+    def _emit_colorspace_selection(self, item, button_name):
+        """
+        Emit the itemSelected signal with the selected item and button name
+        Args:
+            item (str): The selected item.
+            button_name (str): The name of the button.
+        """
+        self.itemSelected.emit(item, button_name)
 
 
 class LabelCraft:
@@ -163,13 +298,12 @@ class LabelCraft:
     """
     def __init__(self):
         """
-        Initialize the LabelCraft UI.
+        Initialize the LabelCraft Class.
         """
 
         package_path = os.path.dirname(__file__)
         ui_path = os.path.join(package_path, '{}.ui'.format(__title__))
 
-        # self.LabelCraftUI = QtUiTools.QUiLoader().load(ui_path)
         self.LabelCraftUI = QtCompat.loadUi(ui_path)
 
         self.LabelCraftUI.setWindowTitle(__title__)
@@ -184,10 +318,10 @@ class LabelCraft:
         self.custom_db = os.path.join(package_path, 'LabelCraft_customizables.json')
         self.data = get_json_data(json_file=self.custom_db)
 
-        self.label_presets = self.data.get('label_presets')
-        self.disable_expressions = self.data.get('tcl_expressions')
-        self.tcl_expressions = self.data.get('tcl_expressions')
-        self.icon_selection = self.data.get('icon_selection')
+        self.label_presets = self.data.get('label_presets', {})
+        self.disable_expressions = self.data.get('tcl_expressions', {})
+        self.tcl_expressions = self.data.get('tcl_expressions', {})
+        self.icon_selection = self.data.get('icon_selection', [])
 
         # create Class attributes
         self.node = None
@@ -205,12 +339,11 @@ class LabelCraft:
 
     def _initialize_ui(self):
         """
-        Set up UI components and default visibility.
+        Set up UI components, default visibility and draggable functionality.
         """
         self.LabelCraftUI.btn_guide.clicked.connect(self.open_guide)
 
-        _credits = '<font size=2 color=slategrey> Label Craft v{} - created by {}</font>'.format(__version__,
-                                                                                                 __author__)
+        _credits = 'Label Craft v{} | created by {}'.format(__version__, __author__)
 
         self.LabelCraftUI.lbl_credits.setText(_credits)
 
@@ -220,7 +353,11 @@ class LabelCraft:
                 child.setVisible(False)
 
     # Open guide
-    def open_guide(self):
+    @staticmethod
+    def open_guide():
+        """
+        Open the LabelCraft guide in the default web browser.
+        """
         import webbrowser
         webbrowser.open(__website_blog__)
 
@@ -233,10 +370,10 @@ class LabelCraft:
             node (nuke.Node): The node to set up the label knob for.
         """
 
+        self.current_label = node['label'].value()
+
         if self.current_node_class in ('backdropnode', 'stickynote', 'dot'):
-            self.html_tags, self.current_label = split_label(node['label'].value())
-        else:
-            self.current_label = node['label'].value()
+            self.html_tags, self.current_label = html_handler(node['label'].value())
 
         if not self.current_label:
             _placeholder = "Write a label to your node"
@@ -280,50 +417,35 @@ class LabelCraft:
                 action = context_menu.addAction(preset)
                 action.triggered.connect(lambda checked=False, p=preset: self.insert_preset_text(p))
 
+            # Add separator and delete submenu
+            if self.presets_label_knob:
+                context_menu.addSeparator()
+                delete_submenu = QMenu('delete preset', context_menu)
+                context_menu.addMenu(delete_submenu)
+
+                # Add the same preset items to delete submenu
+                for preset in self.presets_label_knob:
+                    delete_action = delete_submenu.addAction(preset)
+                    delete_action.triggered.connect(lambda checked=False, p=preset: self.delete_preset(p))
+
+
         # Show the context menu at the cursor position
         point = QtCore.QPoint()
         point.setX(QtGui.QCursor.pos().x())
         point.setY(QtGui.QCursor.pos().y())
         context_menu.exec_(point)
 
-    def save_preset_bkp(self):
+    def _save_db(self):
         """
-        Save the current label as a preset.
+        Save the current data to the custom JSON database.
         """
-        cursor = self.LabelCraftUI.edt_NodeLabel.textCursor()
-        if cursor.hasSelection():
-            preset = cursor.selectedText()
-        else:
-            preset = self.LabelCraftUI.edt_NodeLabel.toPlainText()
-
-        if self.current_node_class in self.label_presets.keys():
-            if preset not in self.label_presets[self.current_node_class]:
-                print('Adding {} to {}'.format(preset, self.current_node_class))
-                self.label_presets[self.current_node_class].append(preset)
-
-                self.data['label_presets'] = self.label_presets
-
-                # Save the updated presets to the JSON file
-                with open(os.path.join(os.path.dirname(__file__), 'LabelCraft_customizables.json'), 'w') as f:
-                    json.dump(self.data, f, indent=4)
-
-        else:
-            print('Creating a new entry to {} node: {}'.format(self.current_node_class, preset))
-            self.label_presets[self.current_node_class] = [preset]
-            self.data['label_presets'] = self.label_presets
-
-            # Save the updated presets to the JSON file
-            with open(os.path.join(os.path.dirname(__file__), 'LabelCraft_customizables.json'), 'w') as f:
-                json.dump(self.data, f, indent=4)
+        with open(self.custom_db, 'w') as f:
+            json.dump(self.data, f, indent=4)
 
     def save_preset(self):
         """
         Save the current label as a preset.
         """
-        def _save_db():
-            with open(self.custom_db, 'w') as f:
-                json.dump(self.data, f, indent=4)
-
         preset = self.LabelCraftUI.edt_NodeLabel.toPlainText()
         cursor = self.LabelCraftUI.edt_NodeLabel.textCursor()
 
@@ -339,7 +461,7 @@ class LabelCraft:
                 self.data['label_presets'] = self.label_presets
 
                 # Save the updated presets to the JSON file
-                _save_db()
+                self._save_db()
 
         else:
             print('Creating a new entry to {} node: {}'.format(self.current_node_class, preset))
@@ -347,7 +469,22 @@ class LabelCraft:
             self.data['label_presets'] = self.label_presets
 
             # Save the updated presets to the JSON file
-            _save_db()
+            self._save_db()
+
+    def delete_preset(self, preset):
+        """
+        Delete existing preset.
+        Args:
+            preset:
+        """
+        if self.current_node_class in self.label_presets:
+            if preset in self.label_presets[self.current_node_class]:
+                self.label_presets[self.current_node_class].remove(preset)
+                self.data['label_presets'] = self.label_presets
+                self._save_db()
+                print('Deleting preset:', preset)
+        else:
+            print('No presets found for node class.', self.current_node_class)
 
     def insert_preset_text(self, preset_text):
         """
@@ -549,11 +686,10 @@ class LabelCraft:
         Set up the UI for Read nodes.
         """
         self.LabelCraftUI.grp_Read.setVisible(True)
+        self.LabelCraftUI.grp_Read.setTitle('{} knobs'.format(self.node.name()))
 
         colorspace_options = self.node['colorspace'].values()
         colorspace_state = self.node['colorspace'].value()
-        self.LabelCraftUI.cbx_Colorspace.addItems(colorspace_options)
-        self.LabelCraftUI.cbx_Colorspace.setCurrentText(colorspace_state)
 
         self.LabelCraftUI.lbl_ReadChannels.setVisible(False)
         self.LabelCraftUI.cbx_Channels.setVisible(False)
@@ -566,7 +702,13 @@ class LabelCraft:
         self.LabelCraftUI.cbx_Channels.addItems(valid_layers)
         self.LabelCraftUI.btn_Shuffle.clicked.connect(self.shuffle_layer)
 
-        self.LabelCraftUI.cbx_Colorspace.currentTextChanged.connect(self.change_read_colorspace)
+        self.btn_colorspace = self.LabelCraftUI.btn_Colorspace
+        self.btn_colorspace.setText(colorspace_state)
+
+        self.read_colorspace = ColorspaceCascadingMenu(self.btn_colorspace, 'ReadColorspace')
+        self.read_colorspace.set_entries(colorspace_options)
+
+        self.read_colorspace.itemSelected.connect(self.change_read_colorspace)
 
         self.LabelCraftUI.btn_shuffle_red.clicked.connect(lambda: self.pressed_shuffle('red'))
         self.LabelCraftUI.btn_shuffle_green.clicked.connect(lambda: self.pressed_shuffle('green'))
@@ -580,8 +722,10 @@ class LabelCraft:
         Set up the UI for Shuffle nodes.
         """
         self.LabelCraftUI.grp_Read.setVisible(True)
+        self.LabelCraftUI.grp_Read.setTitle('{} knobs'.format(self.node.name()))
+
         self.LabelCraftUI.lbl_ReadColorspace.setVisible(False)
-        self.LabelCraftUI.cbx_Colorspace.setVisible(False)
+        self.LabelCraftUI.btn_Colorspace.setVisible(False)
 
         self.LabelCraftUI.btn_Shuffle.setVisible(True)
 
@@ -591,8 +735,6 @@ class LabelCraft:
         self.LabelCraftUI.cbx_Channels.addItems(valid_layers)
         self.LabelCraftUI.btn_Shuffle.clicked.connect(self.shuffle_layer)
 
-        self.LabelCraftUI.cbx_Colorspace.currentTextChanged.connect(self.change_shuffle_channel)
-
         self.LabelCraftUI.btn_shuffle_red.clicked.connect(lambda: self.pressed_shuffle('red'))
         self.LabelCraftUI.btn_shuffle_green.clicked.connect(lambda: self.pressed_shuffle('green'))
         self.LabelCraftUI.btn_shuffle_blue.clicked.connect(lambda: self.pressed_shuffle('blue'))
@@ -600,11 +742,18 @@ class LabelCraft:
         self.LabelCraftUI.btn_shuffle_white.clicked.connect(lambda: self.pressed_shuffle('white'))
         self.LabelCraftUI.btn_shuffle_black.clicked.connect(lambda: self.pressed_shuffle('black'))
 
-    def change_read_colorspace(self):
+    def change_read_colorspace(self, selected_item):
         """
         Change the colorspace of the Read node.
         """
-        self.node['colorspace'].setValue(str(self.LabelCraftUI.cbx_Colorspace.currentText()))
+        button_label = selected_item
+
+        _parts = selected_item.split('/')
+        if _parts:
+            button_label = _parts[-1]
+
+        self.btn_colorspace.setText(button_label)
+        self.node['colorspace'].setValue(str(selected_item))
 
     def change_shuffle_channel(self):
         """
@@ -684,7 +833,7 @@ class LabelCraft:
         Set up the UI for Tracker nodes.
         """
         self.LabelCraftUI.grp_Tracker.setVisible(True)
-        self.LabelCraftUI.grp_Tracker.setTitle('Tracker knobs')
+        self.LabelCraftUI.grp_Tracker.setTitle('{} knobs'.format(self.node.name()))
 
         transform_options = self.node['transform'].values()
         self.LabelCraftUI.cbx_TrackerTransform.addItems(transform_options)
@@ -745,13 +894,13 @@ class LabelCraft:
         """
         # set group to visible and edit the group's name
         self.LabelCraftUI.grp_Merge.setVisible(True)
-        self.LabelCraftUI.grp_Merge.setTitle('{} knobs'.format(self.node.Class()))
+        self.LabelCraftUI.grp_Merge.setTitle('{} knobs'.format(self.node.name()))
 
         # assume node class as Keymix to start and avoid operation error
         self.LabelCraftUI.lbl_MergeOperation.setVisible(False)
         self.LabelCraftUI.cbx_MergeOperation.setVisible(False)
-        self.LabelCraftUI.cbx_MergeOperation.addItem('no operation')
-        self.LabelCraftUI.cbx_MergeOperation.setCurrentText('no operation')
+        # self.LabelCraftUI.cbx_MergeOperation.addItem('no operation')
+        # self.LabelCraftUI.cbx_MergeOperation.setCurrentText('no operation')
 
         # only enable operation knob when exists
         if 'operation' in self.node.knobs():
@@ -848,7 +997,7 @@ class LabelCraft:
         Set up the UI for Roto and RotoPaint nodes.
         """
         self.LabelCraftUI.grp_Roto.setVisible(True)
-        self.LabelCraftUI.grp_Roto.setTitle(self.node.Class())
+        self.LabelCraftUI.grp_Roto.setTitle('{} knobs'.format(self.node.name()))
 
         valid_layers = get_layers(self.node)
 
@@ -910,7 +1059,7 @@ class LabelCraft:
         Set up the UI for Switch and Dissolve nodes.
         """
         self.LabelCraftUI.grp_Switch.setVisible(True)
-        self.LabelCraftUI.grp_Switch.setTitle('{} knobs'.format(self.node.Class()))
+        self.LabelCraftUI.grp_Switch.setTitle('{} knobs'.format(self.node.name()))
 
         # node['which'].toScript()
         if 'which_expression' in self.node.knobs():
@@ -1055,31 +1204,94 @@ class LabelCraft:
         """
         Set up the UI for Log2Lin and OCIOLogConvert nodes.
         """
-        self.LabelCraftUI.grp_Colorspaces.setVisible(True)
-        self.LabelCraftUI.grp_Colorspaces.setTitle('{} knob'.format(self.node.Class()))
-
-        self.LabelCraftUI.lbl_ColorValueB.setVisible(False)
-        self.LabelCraftUI.cbx_ColorValueB.setVisible(False)
-        self.LabelCraftUI.btn_ColorspaceSwap.setVisible(False)
-
         self.current_node_class = 'log'
-        self.LabelCraftUI.lbl_ColorValueA.setVisible(True)
-        self.LabelCraftUI.lbl_ColorValueA.setText('operation')
+        self.LabelCraftUI.grp_logtolin.setVisible(True)
+        self.LabelCraftUI.grp_logtolin.setTitle('{} knobs'.format(self.node.name()))
 
         operation_state = str(self.node['operation'].value())
         operation_options = self.node['operation'].values()
 
-        self.LabelCraftUI.cbx_ColorValueA.setVisible(True)
-        self.LabelCraftUI.cbx_ColorValueA.addItems(operation_options)
-        self.LabelCraftUI.cbx_ColorValueA.setCurrentText(operation_state)
+        opposite = operation_options[1 - operation_options.index(operation_state)]
 
-        self.LabelCraftUI.cbx_ColorValueA.currentTextChanged.connect(self.log_change)
+        self.LabelCraftUI.btn_swap_log.setText(opposite)
 
-    def log_change(self):
+        self.LabelCraftUI.btn_swap_log.clicked.connect(lambda: self.log_change(opposite))
+
+    def log_change(self, operation):
         """
         Change the operation mode of the Log2Lin or OCIOLogConvert node.
         """
-        self.node['operation'].setValue(str(self.LabelCraftUI.cbx_ColorValueA.currentText()))
+        self.node['operation'].setValue(str(operation))
+        self.log2lin_class()
+
+    # OCIOColorspace / Colorspace Class function
+    def colorspace_class(self):
+        """
+        Set up the UI for OCIOColorSpace and Colorspace nodes.
+        """
+
+        knob_map = {
+            'ociocolorspace': {
+                'in_knob': 'in_colorspace',
+                'out_knob': 'out_colorspace',
+            },
+            'colorspace': {
+                'in_knob': 'colorspace_in',
+                'out_knob': 'colorspace_out',
+            }
+        }
+
+        self.LabelCraftUI.grp_Colorspaces.setVisible(True)
+        self.LabelCraftUI.grp_Colorspaces.setTitle('{} knobs'.format(self.node.name()))
+
+        self.in_knob_name = knob_map[self.current_node_class]['in_knob']
+        self.out_knob_name = knob_map[self.current_node_class]['out_knob']
+
+        colorspace_options = self.node[self.in_knob_name].values()
+        in_knob_state = str(self.node[self.in_knob_name].value())
+        out_knob_state = str(self.node[self.out_knob_name].value())
+
+        self.in_button =  self.LabelCraftUI.btn_colorspace_in
+        self.in_button.setText(in_knob_state)
+        self._in_menu = ColorspaceCascadingMenu(self.in_button, self.in_knob_name)
+        self._in_menu.set_entries(colorspace_options)
+        self._in_menu.itemSelected.connect(self.change_colorspace_knob)
+
+        self.out_button = self.LabelCraftUI.btn_colorspace_out
+        self.out_button.setText(out_knob_state)
+        self._out_menu = ColorspaceCascadingMenu(self.out_button, self.out_knob_name)
+        self._out_menu.set_entries(colorspace_options)
+        self._out_menu.itemSelected.connect(self.change_colorspace_knob)
+
+        self.LabelCraftUI.btn_ColorspaceSwap.clicked.connect(self.swap_colorspaces)
+
+    def change_colorspace_knob(self, selected_item, btn_name):
+        """
+        Change the colorspace of the Read node.
+        """
+        button_label = selected_item
+
+        _parts = selected_item.split('/')
+        if _parts:
+            button_label = _parts[-1]
+
+        button = self.LabelCraftUI.findChild(QtWidgets.QPushButton, btn_name)
+        if button:
+            button.setText(button_label)
+        self.node[btn_name].setValue(str(selected_item))
+
+    def swap_colorspaces(self):
+        """
+        Swap the input and output colorspaces.
+        """
+        in_knob_state = str(self.node[self.in_knob_name].value())
+        out_knob_state = str(self.node[self.out_knob_name].value())
+
+        self.node[self.in_knob_name].setValue(out_knob_state)
+        self.node[self.out_knob_name].setValue(in_knob_state)
+
+        self.in_button.setText(str(out_knob_state))
+        self.out_button.setText(str(in_knob_state))
 
     # Dot/ Backdrop/ StickyNote Class function
     def info_class(self):
@@ -1087,7 +1299,7 @@ class LabelCraft:
         Set up the UI for Dot, Backdrop, and StickyNote nodes.
         """
         self.LabelCraftUI.grp_Info.setVisible(True)
-        self.LabelCraftUI.grp_Info.setTitle('{} knobs'.format(self.node.Class()))
+        self.LabelCraftUI.grp_Info.setTitle('{} knobs'.format(self.node.name()))
 
         self.LabelCraftUI.lbl_InfoAlign.setVisible(False)
         self.LabelCraftUI.cbx_InfoAlign.setVisible(False)
@@ -1180,7 +1392,7 @@ class LabelCraft:
         Set up the UI for ScanlineRender nodes.
         """
         self.LabelCraftUI.grp_Scanline.setVisible(True)
-        self.LabelCraftUI.grp_Scanline.setTitle('{}'.format(self.node.Class()))
+        self.LabelCraftUI.grp_Scanline.setTitle('{} knobs'.format(self.node.name()))
 
         current_state = self.node['projection_mode'].value()
         _options = self.node['projection_mode'].values()
@@ -1205,6 +1417,80 @@ class LabelCraft:
         """
         self.node['projection_mode'].setValue(str(command))
 
+    # Frames/ Times Class functions
+    def frames_class(self):
+        """
+        Set up the UI for frame-related nodes.
+        """
+
+        knobs_map = {
+            'framehold': ['first_frame', 'increment', 'set_to_current'],
+            'framerange': ['first_frame', 'last_frame', 'reset'],
+            'frameblend': ['numframes', None, None],
+            'timeoffset': ['time_offset', None, None],
+        }
+
+        self.LabelCraftUI.grp_frame.setVisible(True)
+        self.LabelCraftUI.grp_Tracker.setTitle('{} knobs'.format(self.node.name()))
+        self.LabelCraftUI.lbl_last_frame.hide()
+        self.LabelCraftUI.spn_last_frame.hide()
+        self.LabelCraftUI.btn_frames.hide()
+
+        self.LabelCraftUI.spn_first_frame.setRange(-10000, 10000)
+        self.LabelCraftUI.spn_last_frame.setRange(-10000, 10000)
+
+        self.first_knob = knobs_map[self.current_node_class][0]
+        self.first_value = self.node[self.first_knob].value()
+
+        self.LabelCraftUI.lbl_first_frame.setText(self.first_knob.replace('_', ' '))
+        self.LabelCraftUI.spn_first_frame.setValue(self.first_value)
+
+        self.last_knob = knobs_map.get(self.current_node_class, [None, None, None])[1]
+        self.btn_custom = knobs_map.get(self.current_node_class, [None, None, None])[2]
+
+        if self.last_knob:
+            self.LabelCraftUI.lbl_last_frame.show()
+            self.LabelCraftUI.spn_last_frame.show()
+            self.last_value = self.node[self.last_knob].value()
+            self.LabelCraftUI.lbl_last_frame.setText(self.last_knob.replace('_', ' '))
+            self.LabelCraftUI.spn_last_frame.setValue(self.last_value)
+
+        if self.btn_custom:
+            self.LabelCraftUI.btn_frames.show()
+            self.LabelCraftUI.btn_frames.setText(self.btn_custom.replace('_', ' '))
+
+        self.LabelCraftUI.spn_first_frame.setObjectName(self.first_knob)
+        self.LabelCraftUI.spn_last_frame.setObjectName(self.last_knob)
+
+        self.LabelCraftUI.spn_first_frame.valueChanged.connect(lambda: self.update_frame_knobs(self.first_knob))
+        self.LabelCraftUI.spn_last_frame.valueChanged.connect(lambda: self.update_frame_knobs(self.last_knob))
+        self.LabelCraftUI.btn_frames.clicked.connect(lambda: self.pressed_frame_button(self.btn_custom))
+
+    def update_frame_knobs(self, knob_name):
+        """
+        Update the value of the specified frame-related knob.
+        """
+
+        widget = self.LabelCraftUI.findChild(QtWidgets.QSpinBox, knob_name)
+        if widget:
+            self.node[knob_name].setValue(int(widget.value()))
+
+    def pressed_frame_button(self, operation):
+        """
+        Perform custom operations for frame-related nodes.
+
+        Args:
+            operation (str): The operation to perform.
+        """
+        if operation == 'set_to_current':
+            self.node['first_frame'].setValue(nuke.frame())
+            self.LabelCraftUI.spn_first_frame.setValue(nuke.frame())
+
+        elif operation == 'reset':
+            self.node[self.btn_custom].execute()
+
+    # ================ #
+    # UI related functions
     @staticmethod
     def smart_position_window(dialog):
         """Position dialog under the cursor"""
@@ -1217,7 +1503,6 @@ class LabelCraft:
             screen_num = desktop.screenNumber(cursor_pos)
             screen_rect = desktop.availableGeometry(screen_num)
         else:
-            target_screen = None
             for screen in app.screens():
                 if screen.geometry().contains(cursor_pos):
                     screen_rect = screen.availableGeometry()
@@ -1255,7 +1540,6 @@ class LabelCraft:
             return
 
         self.current_node_class = self.node.Class().lower()
-        self.LabelCraftUI.NodeClass_group.setTitle(self.node.name().lower())
 
         self.label_knob(self.node)
         self.common_knobs(self.node)
@@ -1288,6 +1572,10 @@ class LabelCraft:
             self.current_node_class = self.node.Class().lower()
             self.log2lin_class()
 
+        elif self.node.Class() in ('OCIOColorSpace', 'Colorspace'):
+            self.current_node_class = self.node.Class().lower()
+            self.colorspace_class()
+
         elif self.node.Class() in ('Dissolve', 'Switch'):
             self.current_node_class = self.node.Class().lower()
             self.switch_class()
@@ -1296,9 +1584,19 @@ class LabelCraft:
             self.current_node_class = self.node.Class().lower()
             self.scanline_class()
 
+        elif self.node.Class() in ('TimeOffset', 'FrameHold', 'FrameRange', 'FrameBlend'):
+            self.current_node_class = self.node.Class().lower()
+            self.frames_class()
+
+        ### Final UI adjustments ###
         # Resize to its contents, and re-position under the mouse
-        self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint |
-                                         QtCore.Qt.Popup)
+        self.LabelCraftUI.setWindowFlags(
+            QtCore.Qt.WindowStaysOnTopHint |
+            QtCore.Qt.Popup
+        )
+
+        # self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint |
+        #                                  QtCore.Qt.Window)
 
         self.LabelCraftUI.adjustSize()
         self.smart_position_window(self.LabelCraftUI)
@@ -1312,7 +1610,7 @@ class LabelCraft:
 
 def edit_label():
     """
-    Initialize and run the LabelCraft tool to edit the label of the selected node.
+    Initialize and run the LabelCraft tool.
     """
     run_labelcraft = LabelCraft()
     run_labelcraft.edit_node()
