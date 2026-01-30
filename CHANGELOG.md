@@ -3,6 +3,9 @@
 
 [comment]: <>  (2026-12-10 : YEAR-MONTH-DAY)
 
+## [1.4.1] - 2026-01-27
++ FIX cascading menu
+
 ## [1.4.0] - 2026-01-25
 + FIX Colorspace list for node with this knob type
 + NEW Delete preset functionality 

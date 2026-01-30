@@ -6,14 +6,15 @@ __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.4.0'
-__release_date__ = 'Jan, 25 2026'
+__version__ = '1.4.1'
+__release_date__ = 'Jan, 30 2026'
 __license__ = 'MIT'
 
 import re
 import json
 import random
 import os.path
+from collections import OrderedDict
 
 import nuke
 
@@ -21,7 +22,6 @@ from Qt import QtCore, QtGui, QtWidgets, QtCompat
 from Qt.QtCore import Qt, QUrl, Signal, QObject
 from Qt.QtWidgets import QStyleFactory, QMenu, QAction
 
-nuke.tprint('\n\t', __title__, __version__, '\n')
 
 # Global Functions
 def get_selection():
@@ -217,7 +217,7 @@ class ColorspaceCascadingMenu(QObject, object):
         self._menu = self.create_menu()
         self._menu.exec_(self.button.mapToGlobal(self.button.rect().bottomLeft()))
 
-    def build_entry_tree(self):
+    def build_entry_tree_Nuke11(self):
         """
         Build a hierarchical tree from entries.
 
@@ -228,7 +228,7 @@ class ColorspaceCascadingMenu(QObject, object):
         Returns:
             dict representing a tree structure
         """
-        tree = {}
+        tree = OrderedDict()# {}
 
         for raw in self._entries:
             if not raw:
@@ -252,15 +252,78 @@ class ColorspaceCascadingMenu(QObject, object):
 
         return tree
 
-    def add_tree_to_menu(self, menu, tree, callback):
+    def build_entry_tree(self):
         """
-        Recursively add tree items to a QMenu.
+        Build a hierarchical tree.
+
+        Returns:
+            dict representing a tree structure
         """
-        for label in sorted(tree.keys()):
-            if 'default' in label.lower():
+        tree = OrderedDict()
+
+        for raw in self._entries:
+            if not raw:
                 continue
 
+            parts = raw.split('\t')
+
+            label = parts[0].strip()
+            path = None
+
+            if len(parts) > 1 and parts[1].startswith("Colorspaces/"):
+                path = parts[1].strip()
+
+            # --- Flat entry ---
+            if not path:
+                if label not in tree:
+                    tree[label] = label
+                continue
+
+            path_parts = [p.strip() for p in path.split('/')]
+
+            node = tree
+
+            # Build parent levels only
+            for part in path_parts[:-1]:
+                if part not in node:
+                    node[part] = OrderedDict()
+                node = node[part]
+
+            last_part = path_parts[-1]
+
+            # Avoid duplicate last level
+            if last_part == label:
+                if last_part not in node:
+                    node[last_part] = label
+            else:
+                if last_part not in node:
+                    node[last_part] = OrderedDict()
+                node[last_part][label] = label
+
+        return tree
+
+    def add_tree_to_menu_nuke11(self, menu, tree, callback):
+        """
+        Recursively add tree items to a QMenu.
+        Nuke 11 style
+        """
+        for label in tree.keys():
             value = tree[label]
+
+            if isinstance(value, dict):
+                submenu = QMenu(label, menu)
+                menu.addMenu(submenu)
+                self.add_tree_to_menu_nuke11(submenu, value, callback)
+            else:
+                action = QAction(label, menu)
+                action.triggered.connect(
+                    lambda e=value, n=self.button.objectName(): callback(e, n)
+                )
+                menu.addAction(action)
+
+    def add_tree_to_menu(self, menu, tree, callback):
+
+        for label, value in tree.items():
 
             if isinstance(value, dict):
                 submenu = QMenu(label, menu)
@@ -269,6 +332,7 @@ class ColorspaceCascadingMenu(QObject, object):
             else:
                 action = QAction(label, menu)
                 action.triggered.connect(
+                    # lambda e=value: callback(e)
                     lambda e=value, n=self.button.objectName(): callback(e, n)
                 )
                 menu.addAction(action)
@@ -277,7 +341,13 @@ class ColorspaceCascadingMenu(QObject, object):
         """Create hierarchical menu from entries, supporting '/' and '\\t' separators"""
         menu = QMenu(self.button)
 
-        tree = self.build_entry_tree()
+        # OCIO list and naming is different after Nuke12,
+        # so it will be handled in a specific way.
+        if nuke.NUKE_VERSION_MAJOR < 12:
+            tree = self.build_entry_tree_Nuke11()
+        else:
+            tree = self.build_entry_tree()
+
         self.add_tree_to_menu(menu, tree, self._emit_colorspace_selection)
 
         return menu
