@@ -22,6 +22,7 @@ from Qt import QtCore, QtGui, QtWidgets, QtCompat
 from Qt.QtCore import Qt, QUrl, Signal, QObject
 from Qt.QtWidgets import QStyleFactory, QMenu, QAction
 
+nuke.tprint('\n\t', __title__, __version__, '\n')
 
 # Global Functions
 def get_selection():

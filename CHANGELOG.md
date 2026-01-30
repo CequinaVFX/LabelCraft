@@ -3,6 +3,9 @@
 
 [comment]: <>  (2026-12-10 : YEAR-MONTH-DAY)
 
+## [1.4.2] - 2026-01-30
++ FIX print
+
 ## [1.4.1] - 2026-01-27
 + FIX cascading menu
 
