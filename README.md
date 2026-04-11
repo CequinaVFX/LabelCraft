@@ -1,5 +1,7 @@
 # LabelCraft
 
+## [In depth overview here](www.cequinavfx.com/post/label-craft)
+
 ## Overview
 LabelCraft is a comprehensive labeling tool designed for Foundry's Nuke software. It provides an intuitive interface for customizing node labels, icons, colors, and attributes with ease. Whether you're working with trackers, merge nodes, or sticky notes, LabelCraft streamlines your workflow.
 

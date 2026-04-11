@@ -42,6 +42,10 @@ QCheckBox::indicator:unchecked {
     background: rgb(30, 30, 30);
 }
 
+QPushButton::disabled {
+    color: rgb(36, 36, 36);
+}
+
 #btn_guide {
     font: 8pt;
     color: rgb(255, 66, 66);

@@ -123,8 +123,15 @@ color: rgb(213, 213, 213);</string>
           <property name="title">
            <string>read</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_7" columnstretch="1,2,2,1">
-           <item row="3" column="0" colspan="4">
+          <layout class="QGridLayout" name="gridLayout_7" columnstretch="1,0,0,0">
+           <item row="2" column="1" colspan="3">
+            <widget class="QPushButton" name="btn_Colorspace">
+             <property name="text">
+              <string>colorspace</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0" colspan="4">
             <layout class="QHBoxLayout" name="horlay_shuffle_bw">
              <property name="spacing">
               <number>10</number>
@@ -157,7 +164,41 @@ color: rgb(213, 213, 213);</string>
              </item>
             </layout>
            </item>
-           <item row="2" column="0" colspan="4">
+           <item row="3" column="3">
+            <widget class="QPushButton" name="btn_Shuffle">
+             <property name="toolTip">
+              <string> Shuffle out the selected Layer.</string>
+             </property>
+             <property name="text">
+              <string>shuffle it!</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="lbl_ReadChannels">
+             <property name="text">
+              <string>channels</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="4">
+            <layout class="QHBoxLayout" name="hlay_reload" stretch="3">
+             <property name="leftMargin">
+              <number>50</number>
+             </property>
+             <property name="rightMargin">
+              <number>50</number>
+             </property>
+             <item>
+              <widget class="QPushButton" name="btn_reload_read">
+               <property name="text">
+                <string>reload</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="4" column="0" colspan="4">
             <layout class="QHBoxLayout" name="horlay_shuffle_channels">
              <property name="leftMargin">
               <number>50</number>
@@ -210,43 +251,39 @@ color: rgb(213, 213, 213);</string>
              </item>
             </layout>
            </item>
-           <item row="0" column="0">
+           <item row="3" column="1" colspan="2">
+            <widget class="QComboBox" name="cbx_Channels">
+             <property name="toolTip">
+              <string> Select a Layer to shuffle it.</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
             <widget class="QLabel" name="lbl_ReadColorspace">
              <property name="text">
               <string>colorspace</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="lbl_ReadChannels">
-             <property name="text">
-              <string>channels</string>
+           <item row="1" column="0" colspan="4">
+            <layout class="QHBoxLayout" name="hlay_localization" stretch="2,1">
+             <property name="leftMargin">
+              <number>50</number>
              </property>
-            </widget>
-           </item>
-           <item row="1" column="3">
-            <widget class="QPushButton" name="btn_Shuffle">
-             <property name="toolTip">
-              <string> Shuffle out the selected Layer.</string>
+             <property name="rightMargin">
+              <number>50</number>
              </property>
-             <property name="text">
-              <string>shuffle it!</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1" colspan="3">
-            <widget class="QPushButton" name="btn_Colorspace">
-             <property name="text">
-              <string>colorspace</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1" colspan="2">
-            <widget class="QComboBox" name="cbx_Channels">
-             <property name="toolTip">
-              <string> Select a Layer to shuffle it.</string>
-             </property>
-            </widget>
+             <item>
+              <widget class="QComboBox" name="cbx_localization_policy"/>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_reload_localization">
+               <property name="text">
+                <string>update</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>

@@ -1,3 +1,4 @@
+# coding: utf-8
 """
 LabelCraft is a Nuke tool for editing and customizing node labels and knobs for any given node.
 """
@@ -6,8 +7,8 @@ __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.5.0'
-__release_date__ = 'Feb, 25 2026'
+__version__ = '1.6.0'
+__release_date__ = 'Apr, 12 2026'
 __license__ = 'MIT'
 
 import re
@@ -21,15 +22,9 @@ import nuke
 
 from Qt import QtCore, QtGui, QtWidgets, QtCompat
 from Qt.QtCore import Qt, QUrl, Signal, QObject
-from Qt.QtWidgets import QStyleFactory, QMenu, QAction
+from Qt.QtWidgets import QStyleFactory, QMenu, QAction, QWidget
 
-nuke.tprint('\n\t', __title__, __version__, '\n')
-
-## TODO:
-### add Localization Police controls on Read nodes (ON/ OFF/ RELOAD-UPDATE)
-### add a Reload button on Read nodes
-### add Set to 1 button on Merge nodes [Mix Knob]
-
+nuke.tprint('\n', '\t>> {} v{}.'.format(__title__, __version__))
 
 # Global Functions
 def get_selection():
@@ -370,7 +365,7 @@ class ColorspaceCascadingMenu(QObject, object):
         self.itemSelected.emit(item, button_name)
 
 
-class LabelCraft:
+class LabelCraft(QWidget):
     """
     LabelCraft class for managing and editing labels in Nuke nodes.
     """
@@ -378,6 +373,7 @@ class LabelCraft:
         """
         Initialize the LabelCraft Class.
         """
+        super(LabelCraft, self).__init__()
 
         package_path = os.path.dirname(__file__)
         ui_path = os.path.join(package_path, '{}.ui'.format(__title__))
@@ -765,6 +761,19 @@ class LabelCraft:
         self.LabelCraftUI.grp_Read.setVisible(True)
         self.LabelCraftUI.grp_Read.setTitle('{} knobs'.format(self.node.name()))
 
+        loc_values = self.node['localizationPolicy'].values()
+        localize_options = [value.split('\t')[0] for value in loc_values]
+
+        self.LabelCraftUI.cbx_localization_policy.addItems(localize_options)
+
+        current_localize_state = int(self.node['localizationPolicy'].getValue())
+        self.LabelCraftUI.cbx_localization_policy.setCurrentIndex(current_localize_state)
+
+        if current_localize_state in (0, 2):
+            self.LabelCraftUI.btn_reload_localization.setEnabled(True)
+        else:
+            self.LabelCraftUI.btn_reload_localization.setEnabled(False)
+
         colorspace_options = self.node['colorspace'].values()
         colorspace_state = self.node['colorspace'].value()
 
@@ -787,6 +796,9 @@ class LabelCraft:
 
         self.read_colorspace.itemSelected.connect(self.change_read_colorspace)
 
+        self.LabelCraftUI.btn_reload_read.clicked.connect(lambda: self.node['reload'].execute())
+        self.LabelCraftUI.cbx_localization_policy.currentTextChanged.connect(self.change_localization_status)
+        self.LabelCraftUI.btn_reload_localization.clicked.connect(lambda: self.node['updateLocalization'].execute())
         self.LabelCraftUI.btn_shuffle_red.clicked.connect(lambda: self.pressed_shuffle('red'))
         self.LabelCraftUI.btn_shuffle_green.clicked.connect(lambda: self.pressed_shuffle('green'))
         self.LabelCraftUI.btn_shuffle_blue.clicked.connect(lambda: self.pressed_shuffle('blue'))
@@ -904,6 +916,18 @@ class LabelCraft:
 
         self.LabelCraftUI.close()
 
+    def change_localization_status(self):
+        """
+        Change the Localization Policy knob value
+        """
+        new_state = int(self.LabelCraftUI.cbx_localization_policy.currentIndex())
+        self.node['localizationPolicy'].setValue(new_state)
+
+        if new_state in (0, 2):
+            self.LabelCraftUI.btn_reload_localization.setEnabled(True)
+        else:
+            self.LabelCraftUI.btn_reload_localization.setEnabled(False)
+
     # Tracker Class functions
     def tracker_class(self):
         """
@@ -912,6 +936,7 @@ class LabelCraft:
         self.LabelCraftUI.grp_Tracker.setVisible(True)
         self.LabelCraftUI.grp_Tracker.setTitle('{} knobs'.format(self.node.name()))
 
+        self.LabelCraftUI.lbl_toggle.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         transform_options = self.node['transform'].values()
         self.LabelCraftUI.cbx_TrackerTransform.addItems(transform_options)
 
@@ -926,6 +951,13 @@ class LabelCraft:
         self.LabelCraftUI.cbx_TrackerTransform.currentTextChanged.connect(self.change_transform)
         self.LabelCraftUI.spn_TrackerRefFrame.valueChanged.connect(self.change_reference)
         self.LabelCraftUI.btn_TrackerGetFrame.clicked.connect(self.press_get_current_frame)
+
+        total_tracks = len(re.findall(r'"([^"]+)"', self.node['tracks'].toScript()))
+        if not total_tracks:
+            self.LabelCraftUI.btn_tracker_tg_all.setEnabled(False)
+            self.LabelCraftUI.btn_tracker_tg_translate.setEnabled(False)
+            self.LabelCraftUI.btn_tracker_tg_rotate.setEnabled(False)
+            self.LabelCraftUI.btn_tracker_tg_scale.setEnabled(False)
 
         # btn_tracker_tg_scale
         self.LabelCraftUI.btn_tracker_tg_all.clicked.connect(self.toggle_trackers)
@@ -967,6 +999,12 @@ class LabelCraft:
             self.LabelCraftUI.btn_roto.setIcon(QtGui.QIcon(os.path.join(_icons_dir, 'icons/roto.png')))
             self.LabelCraftUI.btn_cpin.setIcon(QtGui.QIcon(os.path.join(_icons_dir, 'icons/cornerpin.png')))
 
+            if not total_tracks:
+                self.LabelCraftUI.btn_matchmove.setEnabled(False)
+                self.LabelCraftUI.btn_stabilize.setEnabled(False)
+                self.LabelCraftUI.btn_roto.setEnabled(False)
+                self.LabelCraftUI.btn_cpin.setEnabled(False)
+
     def change_reference(self):
         """
         Change the reference frame of the Tracker node.
@@ -987,6 +1025,15 @@ class LabelCraft:
         self.node['reference_frame'].setValue(nuke.frame())
 
     def toggle_trackers(self, mark_translate=True, mark_rotate=True, mark_scale=True):
+        """
+        Invert the current track status for each property (Translate, Rotate, Scale)
+
+        Args:
+            mark_translate (bool): True or False
+            mark_rotate (bool): True or False
+            mark_scale (bool): True or False
+        """
+
         knob = self.node['tracks']
         num_columns = 31
         column_translate = 6
@@ -994,13 +1041,17 @@ class LabelCraft:
         column_scale = 8
         count = 0
 
-        mt = 1 - knob.value(column_translate)
-        mr = 1 - knob.value(column_rotate)
-        ms = 1 - knob.value(column_scale)
+        mt = int(1 - knob.value(column_translate))
+        mr = int(1 - knob.value(column_rotate))
+        ms = int(1 - knob.value(column_scale))
+
+        if all([mark_translate, mark_rotate, mark_scale]):
+            mr = mt
+            ms = mt
 
         total_tracks = len(re.findall(r'"([^"]+)"', knob.toScript()))
 
-        if total_tracks > 1:
+        if total_tracks > 0:
             while count <= int(total_tracks) - 1:
                 if mark_translate:
                     knob.setValue(mt, num_columns * count + column_translate)
@@ -1013,6 +1064,12 @@ class LabelCraft:
                 time.sleep(0.01)
 
     def call_motion_bakery(self, mode='matchmove'):
+        """
+        Calls MotionBakery functions
+
+        Args:
+            mode (str): 'matchmove', 'stabilize', 'roto', or 'cpin'
+        """
         try:
             import MotionBakery
             MotionBakery.bake_selection(mode=mode)
@@ -1068,6 +1125,7 @@ class LabelCraft:
         # mix knob
         if 'mix' in self.node.knobs():
             mix_state = self.node['mix'].value()
+
 
             if any([self.node['mix'].isAnimated(), self.node['mix'].hasExpression()]):
                 self.LabelCraftUI.lbl_Mix.setStyleSheet("""
