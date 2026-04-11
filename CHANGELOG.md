@@ -3,6 +3,13 @@
 
 [comment]: <>  (2026-12-10 : YEAR-MONTH-DAY)
 
+## [1.5.0] - 2026-02-25
++ ADD MotionBakery integration
++ ADD toggle T/R/S/ALL for tracks on Tracker nodes
++ FIX FrameRange updates the UI values when press Reset
++ REMOVE get_tracks_names method from Tracker class
++ Expand the allowed values for the ReferenceFrame on Tracker nodes
+
 ## [1.4.2] - 2026-01-30
 + FIX print
 

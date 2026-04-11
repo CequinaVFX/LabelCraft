@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>1471</height>
+    <height>1578</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -323,7 +323,7 @@ color: rgb(213, 213, 213);</string>
           <property name="title">
            <string>tracker</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout" columnstretch="0,2,2">
+          <layout class="QGridLayout" name="gridLayout" columnstretch="0,0,0">
            <item row="0" column="0">
             <widget class="QLabel" name="lbl_TrackerTransform">
              <property name="text">
@@ -331,23 +331,6 @@ color: rgb(213, 213, 213);</string>
              </property>
              <property name="buddy">
               <cstring>cbx_TrackerTransform</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="lbl_TrackerRefFrame">
-             <property name="text">
-              <string>reference frame</string>
-             </property>
-             <property name="buddy">
-              <cstring>spn_TrackerRefFrame</cstring>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QSpinBox" name="spn_TrackerRefFrame">
-             <property name="toolTip">
-              <string> Sets the frame in the input sequence to use as the reference or identity frame.</string>
              </property>
             </widget>
            </item>
@@ -362,11 +345,255 @@ color: rgb(213, 213, 213);</string>
              </property>
             </widget>
            </item>
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="spn_TrackerRefFrame">
+             <property name="toolTip">
+              <string> Sets the frame in the input sequence to use as the reference or identity frame.</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="1" colspan="2">
             <widget class="QComboBox" name="cbx_TrackerTransform">
              <property name="toolTip">
               <string> Sets the type of transform to apply.</string>
              </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="hlay_toggle_trackers">
+             <item>
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QLabel" name="lbl_toggle">
+               <property name="text">
+                <string>Toogle trackers</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_tracker_tg_all">
+               <property name="minimumSize">
+                <size>
+                 <width>48</width>
+                 <height>48</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>48</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>All</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_tracker_tg_translate">
+               <property name="minimumSize">
+                <size>
+                 <width>48</width>
+                 <height>48</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>48</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>T</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_tracker_tg_rotate">
+               <property name="minimumSize">
+                <size>
+                 <width>48</width>
+                 <height>48</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>48</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>R</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_tracker_tg_scale">
+               <property name="minimumSize">
+                <size>
+                 <width>48</width>
+                 <height>48</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>48</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>S</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="lbl_TrackerRefFrame">
+             <property name="text">
+              <string>reference frame</string>
+             </property>
+             <property name="buddy">
+              <cstring>spn_TrackerRefFrame</cstring>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="3">
+            <widget class="QGroupBox" name="grp_MotionBakery">
+             <property name="title">
+              <string>Motion Bakery</string>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_matchmove">
+                <property name="minimumSize">
+                 <size>
+                  <width>60</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>60</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>MatchMove</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_stabilize">
+                <property name="minimumSize">
+                 <size>
+                  <width>60</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>60</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Stabilize</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_roto">
+                <property name="minimumSize">
+                 <size>
+                  <width>60</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>60</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Roto/ RotoPaint</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_cpin">
+                <property name="minimumSize">
+                 <size>
+                  <width>60</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>60</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>CornerPin</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_4">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </widget>
            </item>
           </layout>

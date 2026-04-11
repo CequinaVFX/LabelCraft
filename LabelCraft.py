@@ -6,12 +6,13 @@ __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
 __website__ = 'https://www.cequinavfx.com/'
 __website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.4.1'
-__release_date__ = 'Jan, 30 2026'
+__version__ = '1.5.0'
+__release_date__ = 'Feb, 25 2026'
 __license__ = 'MIT'
 
 import re
 import json
+import time
 import random
 import os.path
 from collections import OrderedDict
@@ -23,6 +24,12 @@ from Qt.QtCore import Qt, QUrl, Signal, QObject
 from Qt.QtWidgets import QStyleFactory, QMenu, QAction
 
 nuke.tprint('\n\t', __title__, __version__, '\n')
+
+## TODO:
+### add Localization Police controls on Read nodes (ON/ OFF/ RELOAD-UPDATE)
+### add a Reload button on Read nodes
+### add Set to 1 button on Merge nodes [Mix Knob]
+
 
 # Global Functions
 def get_selection():
@@ -499,7 +506,6 @@ class LabelCraft:
                     delete_action = delete_submenu.addAction(preset)
                     delete_action.triggered.connect(lambda checked=False, p=preset: self.delete_preset(p))
 
-
         # Show the context menu at the cursor position
         point = QtCore.QPoint()
         point.setX(QtGui.QCursor.pos().x())
@@ -913,31 +919,53 @@ class LabelCraft:
         self.LabelCraftUI.cbx_TrackerTransform.setCurrentText(transform_state)
 
         reference_frame = int(self.node['reference_frame'].getValue())
-        self.LabelCraftUI.spn_TrackerRefFrame.setRange(1, 1000000)
+        self.LabelCraftUI.spn_TrackerRefFrame.setRange(-100000, 1000000)
         self.LabelCraftUI.spn_TrackerRefFrame.setValue(reference_frame)
 
-        self.get_tracks_names()
         # add signal
         self.LabelCraftUI.cbx_TrackerTransform.currentTextChanged.connect(self.change_transform)
         self.LabelCraftUI.spn_TrackerRefFrame.valueChanged.connect(self.change_reference)
         self.LabelCraftUI.btn_TrackerGetFrame.clicked.connect(self.press_get_current_frame)
 
-    def get_tracks_names(self):
-        """
-        Retrieve and print the names of the tracks in the Tracker node.
-        """
-        n = self.node["tracks"].toScript()
-        rows = n.split("\n")[34:]
+        # btn_tracker_tg_scale
+        self.LabelCraftUI.btn_tracker_tg_all.clicked.connect(self.toggle_trackers)
+        self.LabelCraftUI.btn_tracker_tg_translate.clicked.connect(
+            lambda: self.toggle_trackers(mark_translate=True, mark_rotate=False, mark_scale=False))
+        self.LabelCraftUI.btn_tracker_tg_rotate.clicked.connect(
+            lambda: self.toggle_trackers(mark_translate=False, mark_rotate=True, mark_scale=False))
+        self.LabelCraftUI.btn_tracker_tg_scale.clicked.connect(
+            lambda: self.toggle_trackers(mark_translate=False, mark_rotate=False, mark_scale=True))
 
-        trackers = []
-        for i in rows:
-            try:
-                track_name = i.split("}")[1].split("{")[0][2:-2]
-                if track_name != "":
-                    trackers.append(track_name)
-            except Exception as error:
-                print(error)
-                continue
+        has_motion_bakery = False
+        try:
+            import MotionBakery
+            has_motion_bakery = True
+        except:
+            pass
+
+        if has_motion_bakery:
+
+            self.LabelCraftUI.grp_MotionBakery.setVisible(True)
+            self.LabelCraftUI.btn_matchmove.clicked.connect(lambda: self.call_motion_bakery(mode='matchmove'))
+            self.LabelCraftUI.btn_stabilize.clicked.connect(lambda: self.call_motion_bakery(mode='stabilize'))
+            self.LabelCraftUI.btn_roto.clicked.connect(lambda: self.call_motion_bakery(mode='roto'))
+            self.LabelCraftUI.btn_cpin.clicked.connect(lambda: self.call_motion_bakery(mode='cpin'))
+
+            self.LabelCraftUI.btn_matchmove.setText('')
+            self.LabelCraftUI.btn_stabilize.setText('')
+            self.LabelCraftUI.btn_roto.setText('')
+            self.LabelCraftUI.btn_cpin.setText('')
+
+            self.LabelCraftUI.btn_matchmove.setToolTip('Extract a MatchMove')
+            self.LabelCraftUI.btn_stabilize.setToolTip('Extract a Stabilize')
+            self.LabelCraftUI.btn_roto.setToolTip('Extract a Roto/ RotoPaint')
+            self.LabelCraftUI.btn_cpin.setToolTip('Extract a CornerPin2D')
+
+            _icons_dir = os.path.dirname(MotionBakery.__file__)
+            self.LabelCraftUI.btn_matchmove.setIcon(QtGui.QIcon(os.path.join(_icons_dir, 'icons/matchmove.png')))
+            self.LabelCraftUI.btn_stabilize.setIcon(QtGui.QIcon(os.path.join(_icons_dir, 'icons/stabilize.png')))
+            self.LabelCraftUI.btn_roto.setIcon(QtGui.QIcon(os.path.join(_icons_dir, 'icons/roto.png')))
+            self.LabelCraftUI.btn_cpin.setIcon(QtGui.QIcon(os.path.join(_icons_dir, 'icons/cornerpin.png')))
 
     def change_reference(self):
         """
@@ -957,6 +985,44 @@ class LabelCraft:
         """
         self.LabelCraftUI.spn_TrackerRefFrame.setValue(nuke.frame())
         self.node['reference_frame'].setValue(nuke.frame())
+
+    def toggle_trackers(self, mark_translate=True, mark_rotate=True, mark_scale=True):
+        knob = self.node['tracks']
+        num_columns = 31
+        column_translate = 6
+        column_rotate = 7
+        column_scale = 8
+        count = 0
+
+        mt = 1 - knob.value(column_translate)
+        mr = 1 - knob.value(column_rotate)
+        ms = 1 - knob.value(column_scale)
+
+        total_tracks = len(re.findall(r'"([^"]+)"', knob.toScript()))
+
+        if total_tracks > 1:
+            while count <= int(total_tracks) - 1:
+                if mark_translate:
+                    knob.setValue(mt, num_columns * count + column_translate)
+                if mark_rotate:
+                    knob.setValue(mr, num_columns * count + column_rotate)
+                if mark_scale:
+                    knob.setValue(ms, num_columns * count + column_scale)
+
+                count += 1
+                time.sleep(0.01)
+
+    def call_motion_bakery(self, mode='matchmove'):
+        try:
+            import MotionBakery
+            MotionBakery.bake_selection(mode=mode)
+
+        except ImportError as error:
+            nuke.message('Motion Bakery is not installed.\n'
+                         'Download it from Nukepedia and install it to use this feature!\n'
+                         '{}'.format(error))
+
+        self.LabelCraftUI.close()
 
     # Merge Class functions
     def merge_class(self):
@@ -1161,7 +1227,7 @@ class LabelCraft:
 
             getattr(self.LabelCraftUI, _label_name).setVisible(False)
             getattr(self.LabelCraftUI, _spin_name).setVisible(False)
-            getattr(self.LabelCraftUI, _spin_name).setRange(1, 1000000)
+            getattr(self.LabelCraftUI, _spin_name).setRange(-1000000, 1000000)
             getattr(self.LabelCraftUI, _spin_name).setValue(standard_value)
 
             getattr(self.LabelCraftUI, _spin_name).valueChanged.connect(lambda value, k=knob:
@@ -1560,6 +1626,9 @@ class LabelCraft:
         elif operation == 'reset':
             self.node[self.btn_custom].execute()
 
+            self.LabelCraftUI.spn_first_frame.setValue(self.first_value)
+            self.LabelCraftUI.spn_last_frame.setValue(self.last_value)
+
     # ================ #
     # UI related functions
     @staticmethod
@@ -1665,9 +1734,6 @@ class LabelCraft:
             QtCore.Qt.WindowStaysOnTopHint |
             QtCore.Qt.Popup
         )
-
-        # self.LabelCraftUI.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint |
-        #                                  QtCore.Qt.Window)
 
         self.LabelCraftUI.adjustSize()
         self.smart_position_window(self.LabelCraftUI)
