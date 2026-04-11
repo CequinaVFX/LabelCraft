@@ -5,9 +5,9 @@ LabelCraft is a Nuke tool for editing and customizing node labels and knobs for 
 
 __title__ = 'LabelCraft'
 __author__ = 'Luciano Cequinel'
-__website__ = 'https://www.cequinavfx.com/'
-__website_blog__ = 'https://www.cequinavfx.com/post/label-craft'
-__version__ = '1.6.0'
+__website__ = 'https://www.cequina.com/'
+__website_blog__ = 'https://www.cequina.com/post/label-craft'
+__version__ = '1.6.1'
 __release_date__ = 'Apr, 12 2026'
 __license__ = 'MIT'
 

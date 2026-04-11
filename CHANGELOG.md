@@ -3,6 +3,9 @@
 
 [comment]: <>  (2026-12-10 : YEAR-MONTH-DAY)
 
+## [1.6.1] - 2026-02-25
++ FIX Readme link
+
 ## [1.6.0] - 2026-02-25
 + ADD Reload to the Read nodes
 + ADD Localization Policy to the Read nodes
